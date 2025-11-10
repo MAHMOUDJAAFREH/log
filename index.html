@@ -312,7 +312,11 @@ transition duration-150 bg-white cursor-pointer"
 
     </div>
 
-    <script type="module">
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    
+    <script>
         // ----------------------------------------------------------------
         // NOTE: Firebase Config and App ID are now hardcoded based on user's request.
 // ----------------------------------------------------------------
@@ -335,12 +339,14 @@ transition duration-150 bg-white cursor-pointer"
  __app_id : 'default-app-id';
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-// Firebase Imports (using mandated version 11.6.1)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
- import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
- import { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query, serverTimestamp, getDocs, where, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
- import { query as firestoreQuery } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase namespaced variables (replacing imports)
+        const { initializeApp } = firebase;
+        const { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence } = firebase.auth;
+        // Rename the firestore query function to avoid conflict with the default query name
+        const firestoreQuery = firebase.firestore.query; 
+        const { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query, serverTimestamp, getDocs, where, doc, deleteDoc, updateDoc } = firebase.firestore;
+        
         // Set log level for debugging
         setLogLevel('Debug');
 // Initialize Firebase variables
@@ -946,7 +952,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     const isWorkPredefined = predefinedWorkOptions.includes(workPlaceValue);
  if (isWorkPredefined) {
                         workPlaceSelect.value = workPlaceValue;
- qualificationOtherInput.classList.add('hidden');
+ workPlaceOtherInput.classList.add('hidden');
                         workPlaceOtherInput.required = false;
                         workPlaceOtherInput.value = '';
                     } else if (workPlaceValue) {
@@ -1178,5 +1184,5 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
         }
 
     </script>
-</body>
+    </body>
 </html>
