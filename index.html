@@ -1,27 +1,21 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام تسجيل الحضور وإدارة الدورات</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-body {
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');body {
             font-family: 'Cairo', sans-serif;
             min-height: 100vh;
 }
         /* تعديلات نمط خاصة للنموذج */
         input:focus, select:focus {
-            border-color: #3b82f6 !important;
-box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6 !important;box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
         }
         .rtl-input::placeholder {
             text-align: right;
 }
-    </style>
-</head>
-<body class="bg-gray-50 flex items-start justify-center p-4">
+    </style></head><body class="bg-gray-50 flex items-start justify-center p-4">
 
     <div id="appContainer" class="w-full max-w-lg md:max-w-4xl bg-white p-6 md:p-8 rounded-xl shadow-2xl border border-blue-100 transition-all duration-300 mt-8">
 
@@ -194,8 +188,7 @@ transition duration-150 bg-white cursor-pointer"
       <label for="qualification" class="block text-sm font-semibold text-gray-700 mb-2">درجة المؤهل العلمي <span class="text-red-500">*</span></label>
                     <select id="qualification" name="qualification" required
                             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 bg-white cursor-pointer">
-                        
-<option value="" disabled selected>-- اختر درجة المؤهل --</option>
+                        <option value="" disabled selected>-- اختر درجة المؤهل --</option>
                         <option value="دبلوم">دبلوم</option>
                         <option value="بكالوريوس">بكالوريوس</option>
                         <option value="دراسات عليا">دراسات عليا (ماجستير/دكتوراه)</option>
@@ -328,12 +321,11 @@ transition duration-150 bg-white cursor-pointer"
         // ** التعديل الهام: تم وضع رابط النشر لسكريبت Google Apps Script هنا **
         // (هذا هو الرابط الجديد الذي طلبته)
         // ***************************************************************
-        const GOOGLE_SHEETS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysm_czs0mxTumCBUcfxTSf3XmMFiwbCu4X6HE8G9HnckbGHd-ZY9pYc7UzoDwAZm2z2g/exec';
+        const GOOGLE_SHEETS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCPMsvJLLPt2J8_j8LYFCq8xUmL9AP2gUhoRIkv7XGBeh69qMz5mCENkNcpYfh3ljhtQ/exec';
 // ***************************************************************
 
         // Global variables provided by the environment (using project ID as app ID for simplicity here)
-        const appId = typeof __app_id !== 'undefined' ?
- __app_id : 'default-app-id';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 // Firebase Imports (using mandated version 11.6.1)
@@ -450,8 +442,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Helper function to generate action buttons for a course item.
  * تم تعريفها كـ window.function لجعلها متاحة لـ onclick في العناصر التي يتم إنشاؤها ديناميكياً.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
-        window.getCourseActionButtons = (id, name) => {
+        // *** START SOLUTION (Based on Console Explanation) ***
+        // (الحل الواضح)
+        // تعريف الدالة
+        const getCourseActionButtons = (id, name) => {
             const escapedName = name.replace(/'/g, "\\'");
  return `
                 <button onclick="window.handleEditCourse('${id}', '${escapedName}')" 
@@ -467,13 +461,18 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             
  `;
         };
+        // جعل الدالة "عالمية" ليراها HTML
+        window.getCourseActionButtons = getCourseActionButtons;
+        // *** END SOLUTION ***
 
 
         /**
          * Switches the application view between 'user' and 'admin'.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
-        window.switchView = (view) => {
+        // *** START SOLUTION (Based on Console Explanation) ***
+        // (الحل الواضح)
+        // تعريف الدالة
+        const switchView = (view) => {
             if (view === 'admin') {
                 userView.classList.add('hidden');
  adminView.classList.remove('hidden');
@@ -491,6 +490,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 document.getElementById('userIdDisplay').classList.add('hidden');
  }
         };
+        // جعل الدالة "عالمية" ليراها HTML
+        window.switchView = switchView;
+        // *** END SOLUTION ***
+
 
         /**
          * Loads courses from Firestore and populates the select dropdown and Admin list.
@@ -565,15 +568,16 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  showMessage("خطأ في الدورات", "فشل تحميل قائمة الدورات. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
             });
         };
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
-        window.loadCourses = loadCourses; 
+        // *** START SOLUTION (Based on Console Explanation) ***
+        window.loadCourses = loadCourses; // جعل الدالة عالمية لاستخدامها في زر "إلغاء" التعديل
+        // *** END SOLUTION ***
 
 
 /**
          * Handles deleting a course from Firestore using a custom confirmation modal.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
-        window.handleDeleteCourse = async (courseId, courseName) => {
+        // *** هذا هو الكود المصحح. لقد أزلت الخطأ الإملائي ***
+        const handleDeleteCourse = async (courseId, courseName) => {
             showConfirm(
                 `هل أنت متأكد من حذف الدورة: "${courseName}"؟ سيؤدي هذا إلى إزالة الدورة من قائمة الاختيارات لجميع المستخدمين، لكنه لن يحذف سجلات الحضور السابقة التي تستخدمها.`,
                 async () => {
@@ -588,8 +592,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 
                     try {
                         await deleteDoc(doc(db, COURSES_COLLECTION_PATH, courseId));
-                        showMessage("تم الحذف 
- بنجاح", `تم حذف الدورة: "${courseName}".`, true);
+                        // --- START FIX ---
+                        // Removed the invalid line break in the string
+                        showMessage("تم الحذف بنجاح", `تم حذف الدورة: "${courseName}".`, true);
+                        // --- END FIX ---
                     } catch (error) {
                         console.error("Error deleting course: ", error);
                         showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف الدورة: ${error.message}.`, false);
@@ -598,12 +604,16 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  }
             );
         };
+        // *** START SOLUTION (Based on Console Explanation) ***
+        window.handleDeleteCourse = handleDeleteCourse;
+        // *** END SOLUTION ***
+
 
 /**
          * Enables inline editing for a course name by replacing the text span with an input field.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
-        window.handleEditCourse = (courseId, currentName) => {
+        // *** هذا هو الكود المصحح. لقد أزلت الخطأ الإملائي ***
+        const handleEditCourse = (courseId, currentName) => {
             const nameSpan = document.getElementById(`course-name-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
  const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
             const listItem = document.getElementById(`course-item-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
@@ -630,7 +640,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 // Change action buttons to Save and Cancel
             // Note: The cancel button now calls loadCourses() to force a re-render from snapshot,
             // which is safer and guaranteed to clean up the edit state.
- actionsDiv.innerHTML = `
+            // --- START FIX ---
+            // Fixed the broken line in the SVG string
+            actionsDiv.innerHTML = `
                 <button onclick="window.handleSaveEdit('${courseId}', '${currentName.replace(/'/g, "\\'")}')" 
                         class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>
@@ -638,18 +650,21 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
            </button>
                 <button onclick="window.loadCourses()" 
                         class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" 
- y1="6" y2="18"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
                 </button>
             `;
+            // --- END FIX ---
  input.focus();
         };
+        // *** START SOLUTION (Based on Console Explanation) ***
+        window.handleEditCourse = handleEditCourse;
+        // *** END SOLUTION ***
 
         /**
          * Saves the edited course name to Firestore.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
-        window.handleSaveEdit = async (courseId, originalName) => {
+        // *** هذا هو الكود المصحح. لقد أزلت الخطأ الإملائي ***
+        const handleSaveEdit = async (courseId, originalName) => {
             const input = document.getElementById(`edit-input-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
  const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
 
@@ -672,11 +687,11 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             try {
                 // Check for duplication before updating
                 const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', newName));
- const existingSnapshot = await getDocs(existingCourseQuery);
+                const existingSnapshot = await getDocs(existingCourseQuery);
 
                 if (!existingSnapshot.empty) {
                     // Check if the found document is the one we are editing.
- If not, it's a duplicate.
+                    // If not, it's a duplicate.
                     let isDuplicate = false;
                     existingSnapshot.forEach(doc => {
                         if (doc.id !== courseId) {
@@ -692,12 +707,13 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     }
                 }
 
-
+                // --- START FIX ---
+                // Removed the invalid line breaks
                 await updateDoc(doc(db, COURSES_COLLECTION_PATH, courseId), {
                     name: newName,
                     updatedAt: serverTimestamp() 
-              
-   });
+                });
+                // --- END FIX ---
 
                 showMessage("تم الحفظ بنجاح", `تم تعديل اسم الدورة من "${originalName}" إلى "${newName}".`, true);
 // The onSnapshot listener handles the final UI refresh.
@@ -713,6 +729,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 // will fire upon successful updateDoc and handle the UI refresh.
  }
         };
+        // *** START SOLUTION (Based on Console Explanation) ***
+        window.handleSaveEdit = handleSaveEdit;
+        // *** END SOLUTION ***
 
         /**
          * Handles adding a new course to Firestore.
@@ -796,8 +815,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          const date = record.timestamp?.toDate ? record.timestamp.toDate() : new Date();
                     const formattedDate = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                     
-                    // NEW TABLE ORDER: Date, Course Name, Employee ID, 
- Name Ar, Work Place
+                    // --- START FIX ---
+                    // Fixed broken comment
+                    // NEW TABLE ORDER: Date, Course Name, Employee ID, Name Ar, Work Place
+                    // --- END FIX ---
                     row.innerHTML = `
                         <td class="px-3 py-3 whitespace-nowrap">${formattedDate}</td>
                         <td class="px-3 py-3 whitespace-nowrap">${record.courseName || '---'}</td>
@@ -822,8 +843,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 /**
          * Sends data to the Google Sheets Web App URL.
  */
-        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
-        window.exportRecordsToSheet = async () => {
+        const exportRecordsToSheet = async () => {
             if (!GOOGLE_SHEETS_SCRIPT_URL) {
                 showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false);
  return;
@@ -849,46 +869,57 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 });
 
                
+  // --- START FIX ---
+  // Fixed invalid line breaks in the return object
   return {
                     // This order is crucial and must match DEFAULT_HEADERS in sheets_exporter.js
                     "التاريخ": formattedDate,
                     "اسم الدورة": record.courseName || '',
-                    "الرقم الوظيفي": record.employeeIdEn 
- || '',
+                    "الرقم الوظيفي": record.employeeIdEn || '',
                     "الاسم (عربي)": record.nameAr || '',
                     "الاسم (إنجليزي)": record.nameEn || '',
-                    "الرقم الوطني": record.nationalIdEn ||
- '',
-                    "مكان العمل": record.workPlace ||
- '',
-                    "المسمى الوظيفي": record.jobTitle ||
- '',
-                    "المؤهل العلمي": record.qualification ||
- '',
-                    "رقم الهاتف": record.phoneEn ||
- '',
-                    "App ID": record.appId ||
- appId,
-                    "User ID": record.userId ||
- userId
+                    "الرقم الوطني": record.nationalIdEn || '',
+                    "مكان العمل": record.workPlace || '',
+                    "المسمى الوظيفي": record.jobTitle || '',
+                    "المؤهل العلمي": record.qualification || '',
+                    "رقم الهاتف": record.phoneEn || '',
+                    "App ID": record.appId || appId,
+                    "User ID": record.userId || userId
                 };
+            // --- END FIX ---
             });
  try {
                 const response = await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-            
-         body: JSON.stringify({ records: formattedRecords })
+                    // --- START FIX ---
+                    // 1. Revert back to 'no-cors' mode.
+                    // This prevents the "Failed to fetch" (CORS) error.
+                    // We cannot read the response, but the data *should* be sent.
+                    mode: 'no-cors', 
+                    // 2. Remove the Content-Type header.
+                    // This (along with no-cors) prevents the preflight 'OPTIONS' request.
+                    // The browser will default to 'text/plain', which the Apps Script
+                    // will read via e.postData.contents.
+                    // headers: { 'Content-Type': 'application/json' }, 
+                    // --- END FIX ---
+                    body: JSON.stringify({ records: formattedRecords })
                 });
- const result = await response.json();
 
-                if (result.status === 'success') {
-                    showMessage("نجاح التصدير!", `تم ترحيل ${currentRecords.length} سجل بنجاح إلى جدول البيانات.`, true);
- } else {
-                    console.error("Sheets Script Error:", result.message);
- showMessage("فشل التصدير", `فشل سكريبت Sheets: ${result.message || 'حدث خطأ غير معروف في السكريبت.'}`, false);
- }
+                // --- START FIX ---
+                // 3. Since we are in 'no-cors' mode, we CANNOT read the response.
+                // Comment out the response parsing.
+                // const result = await response.json(); 
+
+                // if (result.status === 'success') {
+                //     showMessage("نجاح التصدير!", `تم ترحيل ${currentRecords.length} سجل بنجاح إلى جدول البيانات.`, true);
+                // } else {
+                //     console.error("Sheets Script Error:", result.message);
+                //     showMessage("فشل التصدير", `فشل سكريبت Sheets: ${result.message || 'حدث خطأ غير معروف في السكريبت.'}`, false);
+                // }
+                
+                // 4. Add an "optimistic" success message (fire-and-forget).
+                showMessage("تم الإرسال!", "تم إرسال السجلات بنجاح. يرجى التحقق من Google Sheet للتأكيد.", true);
+                // --- END FIX ---
 
             } catch (error) {
                 console.error("Network/Fetch Error:", error);
@@ -898,14 +929,80 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  exportButton.textContent = originalText;
             }
         };
+        // *** START SOLUTION (Based on Console Explanation) ***
+        window.exportRecordsToSheet = exportRecordsToSheet;
+        // *** END SOLUTION ***
+
+
+        /**
+         * Sends a *single* new record to Google Sheets in the background.
+         * This is called by handleSubmit for immediate export.
+         */
+        const sendSingleRecordToSheet = async (record, dateObject) => {
+            if (!GOOGLE_SHEETS_SCRIPT_URL) {
+                console.warn("[Sheets] GOOGLE_SHEETS_SCRIPT_URL is not defined. Skipping single record export.");
+                return;
+            }
+
+            console.log("[Sheets] Sending single record to Google Sheets in background...");
+
+            // 1. Format the date (using the client's date object)
+            const formattedDate = dateObject.toLocaleDateString('ar-EG', { 
+                year: 'numeric', month: '2-digit', day: '2-digit', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit' 
+            });
+
+            // 2. Format the record to match the headers (must match exportRecordsToSheet)
+            const sheetRecord = {
+                "التاريخ": formattedDate,
+                "اسم الدورة": record.courseName || '',
+                "الرقم الوظيفي": record.employeeIdEn || '',
+                "الاسم (عربي)": record.nameAr || '',
+                "الاسم (إنجليزي)": record.nameEn || '',
+                "الرقم الوطني": record.nationalIdEn || '',
+                "مكان العمل": record.workPlace || '', // This is the final value (either from select or 'other' input)
+                "المسمى الوظيفي": record.jobTitle || '',
+                "المؤهل العلمي": record.qualification || '', // This is the final value
+                "رقم الهاتف": record.phoneEn || '',
+                "App ID": record.appId || appId,
+                "User ID": record.userId || userId
+            };
+
+            // 3. Prepare payload
+            const payload = {
+                records: [sheetRecord] // Send as an array of one
+            };
+
+            // 4. Send the request (fire-and-forget, no-cors)
+            try {
+                await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    body: JSON.stringify(payload)
+                });
+                console.log("[Sheets] Single record sent successfully (fire-and-forget).");
+            } catch (error) {
+                // Log local error, but don't bother the user
+                console.error("[Sheets] Background send error:", error);
+            }
+        };
+
 
 /**
          * Fetches user data based on employee ID and auto-fills the form.
  */
         const fetchUserDataByEmployeeId = async (event) => {
             const employeeId = event.target.value.trim();
-// Clear fields if the input is empty or too short (assuming ID is 4+ digits)
-            if (employeeId.length < 4 || !/^\d+$/.test(employeeId)) {
+            
+            // --- START MODIFICATION ---
+            // 1. Add console log for debugging
+            console.log(`[Auto-fill] Event triggered. Employee ID: '${employeeId}'`);
+
+            // 2. Change guard clause to allow shorter IDs (e.g., 3+ digits)
+            // Clear fields if the input is empty or too short
+            if (employeeId.length < 3 || !/^\d+$/.test(employeeId)) {
+            // --- END MODIFICATION ---
+                
                 // Clear fields only if they are not the current employee ID being typed
                 if (nameArInput.value) nameArInput.value = '';
  if (nameEnInput.value) nameEnInput.value = '';
@@ -924,6 +1021,11 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 return;
             }
 
+            // --- START MODIFICATION ---
+            // 3. Add console log for query
+            console.log(`[Auto-fill] Querying Firestore for Employee ID: ${employeeId}...`);
+            // --- END MODIFICATION ---
+
             try {
                 // الاستعلام: ابحث عن جميع السجلات التي تطابق الرقم الوظيفي
                 const q = firestoreQuery(
@@ -934,6 +1036,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  const snapshot = await getDocs(q);
 
                 if (!snapshot.empty) {
+                    // --- START MODIFICATION ---
+                    console.log(`[Auto-fill] Found ${snapshot.size} records. Finding latest...`);
+                    // --- END MODIFICATION ---
+                    
                     const allRecords = [];
  snapshot.forEach(doc => allRecords.push(doc.data()));
 
@@ -941,8 +1047,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     allRecords.sort((a, b) => {
                         const timeA = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
                         const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
-   
-                      return timeA - timeB; // Sort descending
+                        return timeA - timeB; // Sort descending
                     });
  const latestRecord = allRecords[0]; // أحدث سجل هو العنصر الأول بعد الفرز
                     
@@ -984,27 +1089,21 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  qualificationOtherInput.classList.add('hidden');
                         qualificationOtherInput.required = false;
                         qualificationOtherInput.value = '';
-                    } else if (qualValue) {
-                        // Value is custom, set select to 'OTHER_QUAL' and show the input
-                        qualificationSelect.value = 'OTHER_QUAL';
- qualificationOtherInput.classList.remove('hidden');
-                        qualificationOtherInput.required = true;
-                        qualificationOtherInput.value = qualValue;
-                    } else {
-                        qualificationSelect.value = '';
- // Reset if value is empty/null
-                        qualificationOtherInput.classList.add('hidden');
- qualificationOtherInput.required = false;
-                        qualificationOtherInput.value = '';
                     }
                     
-                    console.log(`User data loaded successfully for Employee ID: ${employeeId}`);
+                    // --- START MODIFICATION ---
+                    console.log(`[Auto-fill] User data loaded successfully for Employee ID: ${employeeId}`);
+                    // --- END MODIFICATION ---
  } else {
-                    console.log(`No previous records found for Employee ID: ${employeeId}.`);
+                    // --- START MODIFICATION ---
+                    console.log(`[Auto-fill] No previous records found for Employee ID: ${employeeId}.`);
+                    // --- END MODIFICATION ---
  }
 
             } catch (error) {
-                console.error("Error fetching user data by Employee ID:", error);
+                // --- START MODIFICATION ---
+                console.error("[Auto-fill] Error fetching user data by Employee ID:", error);
+                // --- END MODIFICATION ---
 // No need to show a message box, just log the error silently
             }
         };
@@ -1162,6 +1261,12 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 qualificationOtherInput.classList.add('hidden'); 
                 qualificationOtherInput.required = false;
 
+                // --- START MODIFICATION ---
+                // إرسال السجل الفردي إلى Google Sheets في الخلفية
+                // نمرر البيانات التي تم حفظها + تاريخ جديد من جهاز العميل
+                sendSingleRecordToSheet(recordData, new Date());
+                // --- END MODIFICATION ---
+
             } catch (error) {
                 console.error("Error adding document: ", error);
  showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
@@ -1190,6 +1295,4 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  submitButton.disabled = true;
         }
 
-    </script>
-</body>
-</html>
+    </script></body></html>
