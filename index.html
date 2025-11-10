@@ -863,7 +863,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 
                 // Format date/time to include seconds for precise log
     
-             const formattedDate = date.toLocaleDateString('ar-EG', { 
+             // --- START MODIFICATION ---
+             // تم تغيير 'ar-EG' إلى 'en-US'
+             const formattedDate = date.toLocaleDateString('en-US', { 
+             // --- END MODIFICATION ---
                     year: 'numeric', month: '2-digit', day: '2-digit', 
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
                 });
@@ -947,7 +950,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             console.log("[Sheets] Sending single record to Google Sheets in background...");
 
             // 1. Format the date (using the client's date object)
-            const formattedDate = dateObject.toLocaleDateString('ar-EG', { 
+            // --- START MODIFICATION ---
+            // تم تغيير 'ar-EG' إلى 'en-US'
+            const formattedDate = dateObject.toLocaleDateString('en-US', { 
+            // --- END MODIFICATION ---
                 year: 'numeric', month: '2-digit', day: '2-digit', 
                 hour: '2-digit', minute: '2-digit', second: '2-digit' 
             });
