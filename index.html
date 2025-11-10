@@ -450,7 +450,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Helper function to generate action buttons for a course item.
  * تم تعريفها كـ window.function لجعلها متاحة لـ onclick في العناصر التي يتم إنشاؤها ديناميكياً.
  */
-        const getCourseActionButtons = (id, name) => {
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
+        window.getCourseActionButtons = (id, name) => {
             const escapedName = name.replace(/'/g, "\\'");
  return `
                 <button onclick="window.handleEditCourse('${id}', '${escapedName}')" 
@@ -466,16 +467,13 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             
  `;
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        // جعل الدالة "عالمية" ليراها HTML
-        window.getCourseActionButtons = getCourseActionButtons;
-        // *** END SOLUTION ***
 
 
         /**
          * Switches the application view between 'user' and 'admin'.
  */
-        const switchView = (view) => {
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
+        window.switchView = (view) => {
             if (view === 'admin') {
                 userView.classList.add('hidden');
  adminView.classList.remove('hidden');
@@ -493,11 +491,6 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 document.getElementById('userIdDisplay').classList.add('hidden');
  }
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        // جعل الدالة "عالمية" ليراها HTML
-        window.switchView = switchView;
-        // *** END SOLUTION ***
-
 
         /**
          * Loads courses from Firestore and populates the select dropdown and Admin list.
@@ -572,21 +565,21 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  showMessage("خطأ في الدورات", "فشل تحميل قائمة الدورات. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
             });
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        window.loadCourses = loadCourses; // جعل الدالة عالمية لاستخدامها في زر "إلغاء" التعديل
-        // *** END SOLUTION ***
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
+        window.loadCourses = loadCourses; 
 
 
 /**
          * Handles deleting a course from Firestore using a custom confirmation modal.
  */
-        const handleDeleteCourse = async (courseId, courseName) => {
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
+        window.handleDeleteCourse = async (courseId, courseName) => {
             showConfirm(
                 `هل أنت متأكد من حذف الدورة: "${courseName}"؟ سيؤدي هذا إلى إزالة الدورة من قائمة الاختيارات لجميع المستخدمين، لكنه لن يحذف سجلات الحضور السابقة التي تستخدمها.`,
                 async () => {
                
       // Logic executed on confirmation
-                    const courseItem = document.getElementById(`course-item-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+                    const courseItem = document.getElementById(`course-item-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
                     if (courseItem) {
                         courseItem.style.opacity = '0.5';
                     
@@ -605,18 +598,15 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  }
             );
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        window.handleDeleteCourse = handleDeleteCourse;
-        // *** END SOLUTION ***
-
 
 /**
          * Enables inline editing for a course name by replacing the text span with an input field.
  */
-        const handleEditCourse = (courseId, currentName) => {
-            const nameSpan = document.getElementById(`course-name-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
-            const listItem = document.getElementById(`course-item-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
+        window.handleEditCourse = (courseId, currentName) => {
+            const nameSpan = document.getElementById(`course-name-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
+            const listItem = document.getElementById(`course-item-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
 
             if (!nameSpan || !actionsDiv || !listItem) return;
 // Hide the original span
@@ -625,14 +615,14 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             const input = document.createElement('input');
  input.type = 'text';
             input.value = currentName;
-            input.id = `edit-input-${courseId}`; // *** THIS IS THE CORRECTED SYNTAX ***
+            input.id = `edit-input-${courseId}`; // *** تم تصحيح الخطأ الإملائي هنا ***
             input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
  input.dir = 'rtl';
             input.required = true;
 
             // Create temporary div to hold input
             const tempEditDiv = document.createElement('div');
- tempEditDiv.id = `edit-div-${courseId}`; // *** THIS IS THE CORRECTED SYNTAX ***
+ tempEditDiv.id = `edit-div-${courseId}`; // *** تم تصحيح الخطأ الإملائي هنا ***
             tempEditDiv.className = "flex flex-grow items-center gap-2";
             tempEditDiv.appendChild(input);
 // Insert input field before action buttons
@@ -654,16 +644,14 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             `;
  input.focus();
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        window.handleEditCourse = handleEditCourse;
-        // *** END SOLUTION ***
 
         /**
          * Saves the edited course name to Firestore.
  */
-        const handleSaveEdit = async (courseId, originalName) => {
-            const input = document.getElementById(`edit-input-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك (مع التصحيح الإملائي الذي أدخلته أنا) ***
+        window.handleSaveEdit = async (courseId, originalName) => {
+            const input = document.getElementById(`edit-input-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** تم تصحيح الخطأ الإملائي هنا ***
 
             if (!input || !input.value.trim()) {
                 showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
@@ -725,9 +713,6 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 // will fire upon successful updateDoc and handle the UI refresh.
  }
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        window.handleSaveEdit = handleSaveEdit;
-        // *** END SOLUTION ***
 
         /**
          * Handles adding a new course to Firestore.
@@ -837,7 +822,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 /**
          * Sends data to the Google Sheets Web App URL.
  */
-        const exportRecordsToSheet = async () => {
+        // *** هذا هو الكود الأصلي الذي كان يعمل لديك ***
+        window.exportRecordsToSheet = async () => {
             if (!GOOGLE_SHEETS_SCRIPT_URL) {
                 showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false);
  return;
@@ -912,9 +898,6 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  exportButton.textContent = originalText;
             }
         };
-        // *** START SOLUTION (Based on Console Explanation) ***
-        window.exportRecordsToSheet = exportRecordsToSheet;
-        // *** END SOLUTION ***
 
 /**
          * Fetches user data based on employee ID and auto-fills the form.
