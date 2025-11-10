@@ -340,14 +340,9 @@ transition duration-150 bg-white cursor-pointer"
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- Firebase SDK V8 Namespaced Access (Correct way for standard scripts) ---
-        // Note: Functions are accessed via firebase.firestore(), firebase.auth(), etc.
-        // No need for "import" or destructured constants.
+        // --- Firebase SDK V8 Namespaced Access ---
         
-        // Set log level for debugging
-        firebase.firestore.setLogLevel('debug'); // SetLogLevel v8 syntax
-        
-// Initialize Firebase variables
+        // Initialize Firebase variables
         let app, db, auth, userId = 'anonymous';
  let isReady = false; 
 
@@ -576,7 +571,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 async () => {
                
       // Logic executed on confirmation
-                    const courseItem = document.getElementById(`course-item-${courseId}`);
+                    const courseItem = document.getElementById(`course-item-${courseId}`); // CORRECTION
                     if (courseItem) {
                         courseItem.style.opacity = '0.5';
                     
@@ -600,9 +595,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Enables inline editing for a course name by replacing the text span with an input field.
  */
         window.handleEditCourse = (courseId, currentName) => {
-            const nameSpan = document.getElementById(`course-name-${courseId}`);
- const actionsDiv = document.getElementById(`course-actions-${courseId}`);
-            const listItem = document.getElementById(`course-item-${courseId}`);
+            const nameSpan = document.getElementById(`course-name-${courseId}`); // CORRECTION
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // CORRECTION
+            const listItem = document.getElementById(`course-item-${courseId}`); // CORRECTION
 
             if (!nameSpan || !actionsDiv || !listItem) return;
 // Hide the original span
@@ -611,14 +606,14 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             const input = document.createElement('input');
  input.type = 'text';
             input.value = currentName;
-            input.id = `edit-input-${courseId}`;
+            input.id = `edit-input-${courseId}`; // CORRECTION
             input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
  input.dir = 'rtl';
             input.required = true;
 
             // Create temporary div to hold input
             const tempEditDiv = document.createElement('div');
- tempEditDiv.id = `edit-div-${courseId}`;
+ tempEditDiv.id = `edit-div-${courseId}`; // CORRECTION
             tempEditDiv.className = "flex flex-grow items-center gap-2";
             tempEditDiv.appendChild(input);
 // Insert input field before action buttons
@@ -645,8 +640,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Saves the edited course name to Firestore.
  */
         window.handleSaveEdit = async (courseId, originalName) => {
-            const input = document.getElementById(`edit-input-${courseId}`);
- const actionsDiv = document.getElementById(`course-actions-${courseId}`);
+            const input = document.getElementById(`edit-input-${courseId}`); // CORRECTION
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // CORRECTION
 
             if (!input || !input.value.trim()) {
                 showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
@@ -1030,6 +1025,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  */
         const initializeFirebase = async () => {
             try {
+                // V8 syntax for initialization
                 app = firebase.initializeApp(firebaseConfigFromEnv);
                 db = firebase.firestore(app);
                 auth = firebase.auth(app);
@@ -1044,6 +1040,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 
                 userId = auth.currentUser?.uid ||
  crypto.randomUUID();
+                
+                // Set log level after init (V8)
+                firebase.firestore.setLogLevel('debug');
                 
                 loadCourses();
                 loadAttendanceRecords();
