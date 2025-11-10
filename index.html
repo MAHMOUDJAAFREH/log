@@ -586,7 +586,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 async () => {
                
       // Logic executed on confirmation
-                    const courseItem = document.getElementById(`course-item-${courseId}`); // *** CORRECTED SYNTAX ***
+                    const courseItem = document.getElementById(`course-item-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
                     if (courseItem) {
                         courseItem.style.opacity = '0.5';
                     
@@ -614,9 +614,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Enables inline editing for a course name by replacing the text span with an input field.
  */
         const handleEditCourse = (courseId, currentName) => {
-            const nameSpan = document.getElementById(`course-name-${courseId}`); // *** CORRECTED SYNTAX ***
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** CORRECTED SYNTAX ***
-            const listItem = document.getElementById(`course-item-${courseId}`); // *** CORRECTED SYNTAX ***
+            const nameSpan = document.getElementById(`course-name-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+            const listItem = document.getElementById(`course-item-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
 
             if (!nameSpan || !actionsDiv || !listItem) return;
 // Hide the original span
@@ -625,14 +625,14 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             const input = document.createElement('input');
  input.type = 'text';
             input.value = currentName;
-            input.id = `edit-input-${courseId}`; // *** CORRECTED SYNTAX ***
+            input.id = `edit-input-${courseId}`; // *** THIS IS THE CORRECTED SYNTAX ***
             input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
  input.dir = 'rtl';
             input.required = true;
 
             // Create temporary div to hold input
             const tempEditDiv = document.createElement('div');
- tempEditDiv.id = `edit-div-${courseId}`; // *** CORRECTED SYNTAX ***
+ tempEditDiv.id = `edit-div-${courseId}`; // *** THIS IS THE CORRECTED SYNTAX ***
             tempEditDiv.className = "flex flex-grow items-center gap-2";
             tempEditDiv.appendChild(input);
 // Insert input field before action buttons
@@ -662,8 +662,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Saves the edited course name to Firestore.
  */
         const handleSaveEdit = async (courseId, originalName) => {
-            const input = document.getElementById(`edit-input-${courseId}`); // *** CORRECTED SYNTAX ***
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** CORRECTED SYNTAX ***
+            const input = document.getElementById(`edit-input-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); // *** THIS IS THE CORRECTED SYNTAX ***
 
             if (!input || !input.value.trim()) {
                 showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
