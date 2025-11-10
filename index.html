@@ -340,12 +340,31 @@ transition duration-150 bg-white cursor-pointer"
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Firebase namespaced variables (replacing imports)
-        const { initializeApp } = firebase;
-        const { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence } = firebase.auth;
-        // Rename the firestore query function to avoid conflict with the default query name
+        // CORRECT ACCESS METHODS for standard (non-module) SDK:
+        const initializeApp = firebase.initializeApp;
+        // Auth Functions
+        const getAuth = firebase.auth.getAuth;
+        const signInAnonymously = firebase.auth.signInAnonymously;
+        const signInWithCustomToken = firebase.auth.signInWithCustomToken;
+        const setPersistence = firebase.auth.setPersistence;
+        const browserSessionPersistence = firebase.auth.browserSessionPersistence;
+
+        // Firestore Functions
+        const getFirestore = firebase.firestore.getFirestore;
+        const collection = firebase.firestore.collection;
+        const addDoc = firebase.firestore.addDoc;
+        const setLogLevel = firebase.firestore.setLogLevel;
+        const onSnapshot = firebase.firestore.onSnapshot;
+        const query = firebase.firestore.query; // This is the original name
+        const serverTimestamp = firebase.firestore.serverTimestamp;
+        const getDocs = firebase.firestore.getDocs;
+        const where = firebase.firestore.where;
+        const doc = firebase.firestore.doc;
+        const deleteDoc = firebase.firestore.deleteDoc;
+        const updateDoc = firebase.firestore.updateDoc;
+        // Renaming query function to avoid local scope conflict (as was done in the original module code)
         const firestoreQuery = firebase.firestore.query; 
-        const { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query, serverTimestamp, getDocs, where, doc, deleteDoc, updateDoc } = firebase.firestore;
+
         
         // Set log level for debugging
         setLogLevel('Debug');
@@ -359,9 +378,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
         // --- START MODIFICATION ---
         // When running outside the Canvas environment (e.g., as a local file),
         // we use simple root collection names instead of the complex Canvas path.
- const ATTENDANCE_COLLECTION = 'attendance_records'; // اسم المجموعة المحلي
+ const ATTENDANCE_COLLECTION = 'attendance_records'; // اسم المجموعة المحلي [cite: 78]
         const COURSES_COLLECTION = 'courses';
-// اسم المجموعة المحلي
+// اسم المجموعة المحلي [cite: 79]
         
         // Check if we are in the Canvas environment by checking __app_id
         const isCanvasEnvironment = typeof __app_id !== 'undefined' && __app_id !== 'default-app-id';
@@ -379,34 +398,34 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 
 
         // UI elements
-        const employeeIdInput = document.getElementById('employeeIdEn');
+        const employeeIdInput = document.getElementById('employeeIdEn'); [cite: 83]
  const nameArInput = document.getElementById('nameAr');
         const nameEnInput = document.getElementById('nameEn');
         const nationalIdInput = document.getElementById('nationalIdEn');
         const workPlaceSelect = document.getElementById('workPlace'); 
         const workPlaceOtherInput = document.getElementById('workPlaceOther');
- const jobTitleInput = document.getElementById('jobTitle');
+ const jobTitleInput = document.getElementById('jobTitle'); [cite: 84]
         const phoneEnInput = document.getElementById('phoneEn');
         const qualificationSelect = document.getElementById('qualification'); 
         const qualificationOtherInput = document.getElementById('qualificationOther'); 
         
         const userView = document.getElementById('userView');
- const adminView = document.getElementById('adminView');
+ const adminView = document.getElementById('adminView'); [cite: 85]
         const mainTitle = document.getElementById('mainTitle');
         const viewToggle = document.getElementById('viewToggle');
         const form = document.getElementById('attendanceForm');
         const courseForm = document.getElementById('courseForm');
- const courseNameSelect = document.getElementById('courseName');
+ const courseNameSelect = document.getElementById('courseName'); [cite: 86]
         const courseListUl = document.getElementById('courseList');
         const recordsTableBody = document.getElementById('attendanceRecordsTable');
         const recordCountSpan = document.getElementById('recordCount');
         const submitButton = document.getElementById('submitButton');
- const buttonText = document.getElementById('buttonText');
+ const buttonText = document.getElementById('buttonText'); [cite: 87]
         const loadingSpinner = document.getElementById('loadingSpinner');
         const exportButton = document.getElementById('exportButton');
-// Global variable to store confirmation callback
+// Global variable to store confirmation callback [cite: 88]
         let confirmCallback = null;
-// Event listener for the "Yes" button in the confirm modal
+// Event listener for the "Yes" button in the confirm modal [cite: 89]
         document.getElementById('confirmYes')?.addEventListener('click', () => {
             document.getElementById('confirmBox').classList.add('hidden', 'opacity-0');
             document.getElementById('confirmBox').classList.remove('opacity-100');
@@ -414,138 +433,138 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 confirmCallback();
                 confirmCallback = null;
       
-       }
+       } [cite: 90]
         });
-// Function to show custom modal messages
+// Function to show custom modal messages [cite: 91]
         const showMessage = (title, body, isSuccess = false) => {
-            const messageBox = document.getElementById('messageBox');
- const messageTitle = document.getElementById('messageTitle');
-            const messageBody = document.getElementById('messageBody');
-            const button = messageBox.querySelector('button');
+            const messageBox = document.getElementById('messageBox'); [cite: 91]
+ const messageTitle = document.getElementById('messageTitle'); [cite: 92]
+            const messageBody = document.getElementById('messageBody'); [cite: 92]
+            const button = messageBox.querySelector('button'); [cite: 92]
 
-            messageTitle.textContent = title;
-            messageBody.textContent = body;
-// Set style based on success/error
-            messageTitle.classList.remove('text-red-600', 'text-green-600');
- button.classList.remove('bg-blue-600', 'bg-green-600');
+            messageTitle.textContent = title; [cite: 92]
+            messageBody.textContent = body; [cite: 92]
+// Set style based on success/error [cite: 93]
+            messageTitle.classList.remove('text-red-600', 'text-green-600'); [cite: 93]
+ button.classList.remove('bg-blue-600', 'bg-green-600'); [cite: 94]
 
-            if (isSuccess) {
-                messageTitle.classList.add('text-green-600');
- button.classList.add('bg-green-600');
-            } else {
-                messageTitle.classList.add('text-red-600');
- button.classList.add('bg-blue-600');
+            if (isSuccess) { [cite: 94]
+                messageTitle.classList.add('text-green-600'); [cite: 94]
+ button.classList.add('bg-green-600'); [cite: 95]
+            } else { [cite: 95]
+                messageTitle.classList.add('text-red-600'); [cite: 95]
+ button.classList.add('bg-blue-600'); [cite: 96]
             }
 
             // Show the modal
-            messageBox.classList.remove('hidden');
- setTimeout(() => messageBox.classList.add('opacity-100'), 10);
+            messageBox.classList.remove('hidden'); [cite: 96]
+ setTimeout(() => messageBox.classList.add('opacity-100'), 10); [cite: 97]
         };
         
         // Function to show custom confirmation modal
         const showConfirm = (body, onConfirm) => {
-            const confirmBox = document.getElementById('confirmBox');
- document.getElementById('confirmBody').textContent = body;
-            confirmCallback = onConfirm;
+            const confirmBox = document.getElementById('confirmBox'); [cite: 97]
+ document.getElementById('confirmBody').textContent = body; [cite: 98]
+            confirmCallback = onConfirm; [cite: 98]
 
-            confirmBox.classList.remove('hidden');
-            setTimeout(() => confirmBox.classList.add('opacity-100'), 10);
+            confirmBox.classList.remove('hidden'); [cite: 98]
+            setTimeout(() => confirmBox.classList.add('opacity-100'), 10); [cite: 98]
         };
 /**
-         * Helper function to generate action buttons for a course item.
- * تم تعريفها كـ window.function لجعلها متاحة لـ onclick في العناصر التي يتم إنشاؤها ديناميكياً.
+         * Helper function to generate action buttons for a course item. [cite: 99]
+ * تم تعريفها كـ window.function لجعلها متاحة لـ onclick في العناصر التي يتم إنشاؤها ديناميكياً. [cite: 100, 101]
  */
         window.getCourseActionButtons = (id, name) => {
-            const escapedName = name.replace(/'/g, "\\'");
+            const escapedName = name.replace(/'/g, "\\'"); [cite: 101]
  return `
                 <button onclick="window.handleEditCourse('${id}', '${escapedName}')" 
                         class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition duration-150" title="تعديل">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 
- 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+ 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> [cite: 102, 103]
                 </button>
                 <button onclick="window.handleDeleteCourse('${id}', '${escapedName}')" 
                         class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف">
                
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> [cite: 104]
                 </button>
             
- `;
+ `; [cite: 105]
         };
 
 
         /**
-         * Switches the application view between 'user' and 'admin'.
+         * Switches the application view between 'user' and 'admin'. [cite: 106]
  */
         window.switchView = (view) => {
             if (view === 'admin') {
-                userView.classList.add('hidden');
- adminView.classList.remove('hidden');
-                mainTitle.textContent = 'لوحة تحكم المشرف';
-                viewToggle.textContent = 'نموذج الحضور';
-                viewToggle.onclick = () => window.switchView('user');
-                document.getElementById('userIdDisplay').classList.remove('hidden');
-                document.getElementById('currentUserId').textContent = userId;
+                userView.classList.add('hidden'); [cite: 106]
+ adminView.classList.remove('hidden'); [cite: 107]
+                mainTitle.textContent = 'لوحة تحكم المشرف'; [cite: 107]
+                viewToggle.textContent = 'نموذج الحضور'; [cite: 107]
+                viewToggle.onclick = () => window.switchView('user'); [cite: 107]
+                document.getElementById('userIdDisplay').classList.remove('hidden'); [cite: 107]
+                document.getElementById('currentUserId').textContent = userId; [cite: 107]
  } else { // user view
-                adminView.classList.add('hidden');
- userView.classList.remove('hidden');
-                mainTitle.textContent = 'نموذج تسجيل الحضور';
-                viewToggle.textContent = 'لوحة المشرف';
-                viewToggle.onclick = () => window.switchView('admin');
-                document.getElementById('userIdDisplay').classList.add('hidden');
+                adminView.classList.add('hidden'); [cite: 108]
+ userView.classList.remove('hidden'); [cite: 109]
+                mainTitle.textContent = 'نموذج تسجيل الحضور'; [cite: 109]
+                viewToggle.textContent = 'لوحة المشرف'; [cite: 109]
+                viewToggle.onclick = () => window.switchView('admin'); [cite: 109]
+                document.getElementById('userIdDisplay').classList.add('hidden'); [cite: 109, 110]
  }
         };
 
         /**
-         * Loads courses from Firestore and populates the select dropdown and Admin list.
+         * Loads courses from Firestore and populates the select dropdown and Admin list. [cite: 110, 111]
  */
         const loadCourses = () => {
-            if (!db) return;
- const q = query(collection(db, COURSES_COLLECTION_PATH));
+            if (!db) return; [cite: 111]
+ const q = query(collection(db, COURSES_COLLECTION_PATH)); [cite: 112]
             
-            // onSnapshot for real-time updates
-            onSnapshot(q, (snapshot) => {
-                const courses = [];
-                const courseDocs = {}; // Store docId and name for CRUD operations
+            // onSnapshot for real-time updates [cite: 112]
+            onSnapshot(q, (snapshot) => { [cite: 112]
+                const courses = []; [cite: 112]
+                const courseDocs = {}; // Store docId and name for CRUD operations [cite: 112]
                 snapshot.forEach((doc) => {
             
-         const data = doc.data();
-                    courses.push(data.name);
-                    courseDocs[data.name] = { id: doc.id, name: data.name };
+         const data = doc.data(); [cite: 113]
+                    courses.push(data.name); [cite: 113]
+                    courseDocs[data.name] = { id: doc.id, name: data.name }; [cite: 113]
                 });
 
-                // 1. Populate User Dropdown
+                // 1. Populate User Dropdown [cite: 113]
       
-           courseNameSelect.innerHTML = '<option value="" disabled selected>-- الرجاء اختيار اسم الدورة --</option>';
-                courses.sort().forEach(course => {
-                    const option = document.createElement('option');
-                    option.value = course;
+           courseNameSelect.innerHTML = '<option value="" disabled selected>-- الرجاء اختيار اسم الدورة --</option>'; [cite: 114]
+                courses.sort().forEach(course => { [cite: 114]
+                    const option = document.createElement('option'); [cite: 114]
+                    option.value = course; [cite: 114]
                  
-    option.textContent = course;
-                    courseNameSelect.appendChild(option);
+    option.textContent = course; [cite: 115]
+                    courseNameSelect.appendChild(option); [cite: 115]
                 });
                 
-                // تم تمكين زر الإرسال بناءً على جاهزية النظام
+                // تم تمكين زر الإرسال بناءً على جاهزية النظام [cite: 115]
                 submitButton.disabled = !isReady 
- || courses.length === 0; 
-                courseNameSelect.disabled = false;
+ || courses.length === 0; [cite: 116] 
+                courseNameSelect.disabled = false; [cite: 116]
 
-                // 2. Populate Admin List
-                courseListUl.innerHTML = '';
- if (courses.length > 0) {
-                    courses.sort().forEach(courseName => {
-                        const course = courseDocs[courseName];
-                        const li = document.createElement('li');
+                // 2. Populate Admin List [cite: 116]
+                courseListUl.innerHTML = ''; [cite: 116]
+ if (courses.length > 0) { [cite: 117]
+                    courses.sort().forEach(courseName => { [cite: 117]
+                        const course = courseDocs[courseName]; [cite: 117]
+                        const li = document.createElement('li'); [cite: 117]
                     
-     li.id = `course-item-${course.id}`;
-                        li.className = "flex items-center justify-between border-b last:border-b-0 py-2 group";
-                        li.dir = "rtl"; // Ensure proper RTL alignment
+     li.id = `course-item-${course.id}`; [cite: 118]
+                        li.className = "flex items-center justify-between border-b last:border-b-0 py-2 group"; [cite: 118]
+                        li.dir = "rtl"; // Ensure proper RTL alignment [cite: 118]
                         
        
-                  // --- START OF MODIFICATION ---
-                        // SIMPLIFIED: Always render the standard view. 
-                        // This prevents data conflicts during real-time updates if an item is being edited.
+                  // --- START OF MODIFICATION --- [cite: 118, 119]
+                        // SIMPLIFIED: Always render the standard view. [cite: 119, 120]
+                        // This prevents data conflicts during real-time updates if an item is being edited. [cite: 120]
           
-                // Any in-progress edit will be safely cancelled by the snapshot re-render.
+                // Any in-progress edit will be safely cancelled by the snapshot re-render. [cite: 120]
                         li.innerHTML = `
                             <span id="course-name-${course.id}" class="truncate text-base font-medium text-gray-800">${course.name}</span>
                 
@@ -553,79 +572,79 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                                 ${window.getCourseActionButtons(course.id, course.name)}
                             </div>
                     
-     `;
-                        // --- END OF MODIFICATION ---
+     `; [cite: 121, 122]
+                        // --- END OF MODIFICATION --- [cite: 122]
 
-                        courseListUl.appendChild(li);
+                        courseListUl.appendChild(li); [cite: 122, 123]
  });
                 } else {
-                    courseListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات مسجلة بعد.</li>';
+                    courseListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات مسجلة بعد.</li>'; [cite: 123, 124]
  }
 
-                console.log(`Loaded ${courses.length} courses.`);
+                console.log(`Loaded ${courses.length} courses.`); [cite: 124]
  }, (error) => {
-                console.error("Error loading courses:", error);
- showMessage("خطأ في الدورات", "فشل تحميل قائمة الدورات. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
+                console.error("Error loading courses:", error); [cite: 125]
+ showMessage("خطأ في الدورات", "فشل تحميل قائمة الدورات. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false); [cite: 126]
             });
         };
 /**
-         * Handles deleting a course from Firestore using a custom confirmation modal.
+         * Handles deleting a course from Firestore using a custom confirmation modal. [cite: 127, 128]
  */
-        window.handleDeleteCourse = async (courseId, courseName) => {
+        window.handleDeleteCourse = async (courseId, courseName) => { [cite: 128]
             showConfirm(
                 `هل أنت متأكد من حذف الدورة: "${courseName}"؟ سيؤدي هذا إلى إزالة الدورة من قائمة الاختيارات لجميع المستخدمين، لكنه لن يحذف سجلات الحضور السابقة التي تستخدمها.`,
                 async () => {
                
-      // Logic executed on confirmation
-                    const courseItem = document.getElementById(`course-item-${courseId}`);
-                    if (courseItem) {
-                        courseItem.style.opacity = '0.5';
+      // Logic executed on confirmation [cite: 129]
+                    const courseItem = document.getElementById(`course-item-${courseId}`); [cite: 129]
+                    if (courseItem) { [cite: 129]
+                        courseItem.style.opacity = '0.5'; [cite: 129]
                     
-    courseItem.style.pointerEvents = 'none';
+    courseItem.style.pointerEvents = 'none'; [cite: 130]
                     }
 
-                    try {
-                        await deleteDoc(doc(db, COURSES_COLLECTION_PATH, courseId));
+                    try { [cite: 130]
+                        await deleteDoc(doc(db, COURSES_COLLECTION_PATH, courseId)); [cite: 130]
                         showMessage("تم الحذف 
- بنجاح", `تم حذف الدورة: "${courseName}".`, true);
-                    } catch (error) {
-                        console.error("Error deleting course: ", error);
-                        showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف الدورة: ${error.message}.`, false);
+ بنجاح", `تم حذف الدورة: "${courseName}".`, true); [cite: 131]
+                    } catch (error) { [cite: 131]
+                        console.error("Error deleting course: ", error); [cite: 131]
+                        showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف الدورة: ${error.message}.`, false); [cite: 132]
  }
-                    // The onSnapshot listener handles the final UI removal/re-render.
+                    // The onSnapshot listener handles the final UI removal/re-render. [cite: 132, 133]
  }
             );
         };
 /**
-         * Enables inline editing for a course name by replacing the text span with an input field.
+         * Enables inline editing for a course name by replacing the text span with an input field. [cite: 134, 135]
  */
         window.handleEditCourse = (courseId, currentName) => {
-            const nameSpan = document.getElementById(`course-name-${courseId}`);
- const actionsDiv = document.getElementById(`course-actions-${courseId}`);
-            const listItem = document.getElementById(`course-item-${courseId}`);
+            const nameSpan = document.getElementById(`course-name-${courseId}`); [cite: 135]
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); [cite: 136]
+            const listItem = document.getElementById(`course-item-${courseId}`); [cite: 136]
 
-            if (!nameSpan || !actionsDiv || !listItem) return;
-// Hide the original span
-            nameSpan.classList.add('hidden');
-// Create input field
-            const input = document.createElement('input');
- input.type = 'text';
-            input.value = currentName;
-            input.id = `edit-input-${courseId}`;
-            input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
- input.dir = 'rtl';
-            input.required = true;
+            if (!nameSpan || !actionsDiv || !listItem) return; [cite: 136]
+// Hide the original span [cite: 137]
+            nameSpan.classList.add('hidden'); [cite: 137]
+// Create input field [cite: 138]
+            const input = document.createElement('input'); [cite: 138]
+ input.type = 'text'; [cite: 139]
+            input.value = currentName; [cite: 139]
+            input.id = `edit-input-${courseId}`; [cite: 139]
+            input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500'; [cite: 139]
+ input.dir = 'rtl'; [cite: 140]
+            input.required = true; [cite: 140]
 
-            // Create temporary div to hold input
-            const tempEditDiv = document.createElement('div');
- tempEditDiv.id = `edit-div-${courseId}`;
-            tempEditDiv.className = "flex flex-grow items-center gap-2";
-            tempEditDiv.appendChild(input);
-// Insert input field before action buttons
-            listItem.insertBefore(tempEditDiv, actionsDiv);
-// Change action buttons to Save and Cancel
-            // Note: The cancel button now calls loadCourses() to force a re-render from snapshot,
-            // which is safer and guaranteed to clean up the edit state.
+            // Create temporary div to hold input [cite: 140]
+            const tempEditDiv = document.createElement('div'); [cite: 140]
+ tempEditDiv.id = `edit-div-${courseId}`; [cite: 141]
+            tempEditDiv.className = "flex flex-grow items-center gap-2"; [cite: 141]
+            tempEditDiv.appendChild(input); [cite: 141]
+// Insert input field before action buttons [cite: 142]
+            listItem.insertBefore(tempEditDiv, actionsDiv); [cite: 142]
+// Change action buttons to Save and Cancel [cite: 143]
+            // Note: The cancel button now calls loadCourses() to force a re-render from snapshot, [cite: 143]
+            // which is safer and guaranteed to clean up the edit state. [cite: 144]
  actionsDiv.innerHTML = `
                 <button onclick="window.handleSaveEdit('${courseId}', '${currentName.replace(/'/g, "\\'")}')" 
                         class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل">
@@ -637,53 +656,53 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" 
  y1="6" y2="18"/></svg>
                 </button>
-            `;
- input.focus();
+            `; [cite: 145, 146]
+ input.focus(); [cite: 147]
         };
 
         /**
-         * Saves the edited course name to Firestore.
+         * Saves the edited course name to Firestore. [cite: 147, 148]
  */
         window.handleSaveEdit = async (courseId, originalName) => {
-            const input = document.getElementById(`edit-input-${courseId}`);
- const actionsDiv = document.getElementById(`course-actions-${courseId}`);
+            const input = document.getElementById(`edit-input-${courseId}`); [cite: 148]
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`); [cite: 149]
 
-            if (!input || !input.value.trim()) {
-                showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
- return;
+            if (!input || !input.value.trim()) { [cite: 149]
+                showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false); [cite: 149]
+ return; [cite: 150]
             }
             
-            const newName = input.value.trim();
- if (newName === originalName) {
-                showMessage("إلغاء التعديل", "لم يتم حفظ التعديل: الاسم الجديد مطابق للاسم القديم.", false);
+            const newName = input.value.trim(); [cite: 150, 151]
+ if (newName === originalName) { [cite: 151]
+                showMessage("إلغاء التعديل", "لم يتم حفظ التعديل: الاسم الجديد مطابق للاسم القديم.", false); [cite: 151]
 // Trigger re-render to clean up edit fields
-                loadCourses();
- return;
+                loadCourses(); [cite: 152]
+ return; [cite: 153]
             }
             
-            input.disabled = true;
- actionsDiv.style.opacity = '0.5'; 
+            input.disabled = true; [cite: 153]
+ actionsDiv.style.opacity = '0.5'; [cite: 154] 
 
             try {
                 // Check for duplication before updating
-                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', newName));
- const existingSnapshot = await getDocs(existingCourseQuery);
+                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', newName)); [cite: 154, 155]
+ const existingSnapshot = await getDocs(existingCourseQuery); [cite: 155]
 
-                if (!existingSnapshot.empty) {
+                if (!existingSnapshot.empty) { [cite: 155]
                     // Check if the found document is the one we are editing.
- If not, it's a duplicate.
-                    let isDuplicate = false;
-                    existingSnapshot.forEach(doc => {
-                        if (doc.id !== courseId) {
-                            isDuplicate = true;
+ If not, it's a duplicate. [cite: 156]
+                    let isDuplicate = false; [cite: 156]
+                    existingSnapshot.forEach(doc => { [cite: 156]
+                        if (doc.id !== courseId) { [cite: 156]
+                            isDuplicate = true; [cite: 156]
                         }
        
-              });
- if (isDuplicate) {
-                        showMessage("خطأ", `الدورة "${newName}" موجودة بالفعل لدورة أخرى.`, false);
- input.disabled = false;
-                        actionsDiv.style.opacity = '1';
-                        return;
+              }); [cite: 157]
+ if (isDuplicate) { [cite: 158]
+                        showMessage("خطأ", `الدورة "${newName}" موجودة بالفعل لدورة أخرى.`, false); [cite: 158]
+ input.disabled = false; [cite: 159]
+                        actionsDiv.style.opacity = '1'; [cite: 159]
+                        return; [cite: 159]
                     }
                 }
 
@@ -692,495 +711,497 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     name: newName,
                     updatedAt: serverTimestamp() 
               
-   });
+   }); [cite: 160]
 
-                showMessage("تم الحفظ بنجاح", `تم تعديل اسم الدورة من "${originalName}" إلى "${newName}".`, true);
-// The onSnapshot listener handles the final UI refresh.
+                showMessage("تم الحفظ بنجاح", `تم تعديل اسم الدورة من "${originalName}" إلى "${newName}".`, true); [cite: 160, 161]
+// The onSnapshot listener handles the final UI refresh. [cite: 161]
                 
-            } catch (error) {
-                console.error("Error saving course edit: ", error);
- showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false);
+            } catch (error) { [cite: 161]
+                console.error("Error saving course edit: ", error); [cite: 162]
+ showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false); [cite: 162]
  } finally {
-                // In case of error, re-enable (though onSnapshot will refresh anyway)
-                input.disabled = false;
- actionsDiv.style.opacity = '1';
-                // We don't call loadCourses() here because the onSnapshot listener 
-                // will fire upon successful updateDoc and handle the UI refresh.
+                // In case of error, re-enable (though onSnapshot will refresh anyway) [cite: 163]
+                input.disabled = false; [cite: 163]
+ actionsDiv.style.opacity = '1'; [cite: 164]
+                // We don't call loadCourses() here because the onSnapshot listener [cite: 164]
+                // will fire upon successful updateDoc and handle the UI refresh. [cite: 165]
+// If there's an error, the user can click cancel (which calls loadCourses) [cite: 165]
+                // or retry saving. [cite: 166]
  }
         };
 
         /**
-         * Handles adding a new course to Firestore.
+         * Handles adding a new course to Firestore. [cite: 166, 167]
  */
         const handleAddCourse = async (event) => {
-            event.preventDefault();
- const newCourseInput = document.getElementById('newCourseName');
-            const courseName = newCourseInput.value.trim();
-            const addCourseButton = document.getElementById('addCourseButton');
+            event.preventDefault(); [cite: 167]
+ const newCourseInput = document.getElementById('newCourseName'); [cite: 168]
+            const courseName = newCourseInput.value.trim(); [cite: 168]
+            const addCourseButton = document.getElementById('addCourseButton'); [cite: 168]
 
-            if (!courseName) return;
+            if (!courseName) return; [cite: 168]
 
-            addCourseButton.disabled = true;
- addCourseButton.textContent = "جاري الإضافة...";
+            addCourseButton.disabled = true; [cite: 168]
+ addCourseButton.textContent = "جاري الإضافة..."; [cite: 169]
 
             try {
-                // Check if course already exists (case-insensitive for a simple check)
-                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', courseName));
- const existingSnapshot = await getDocs(existingCourseQuery);
+                // Check if course already exists (case-insensitive for a simple check) [cite: 169]
+                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', courseName)); [cite: 169, 170]
+ const existingSnapshot = await getDocs(existingCourseQuery); [cite: 170]
                 
-                if (!existingSnapshot.empty) {
-                    showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false);
- return;
+                if (!existingSnapshot.empty) { [cite: 170]
+                    showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false); [cite: 170]
+ return; [cite: 171]
                 }
                 
-                await addDoc(collection(db, COURSES_COLLECTION_PATH), {
-                    name: courseName,
+                await addDoc(collection(db, COURSES_COLLECTION_PATH), { [cite: 171]
+                    name: courseName, [cite: 171]
                     createdAt: serverTimestamp() 
-                });
- showMessage("تم بنجاح", `تم إضافة الدورة: "${courseName}"`, true);
-                newCourseInput.value = '';
-// Clear input
-            } catch (error) {
-                console.error("Error adding course: ", error);
- showMessage("خطأ في الإضافة", `حدث خطأ أثناء إضافة الدورة: ${error.message}.`, false);
+                }); [cite: 171]
+ showMessage("تم بنجاح", `تم إضافة الدورة: "${courseName}"`, true); [cite: 172]
+                newCourseInput.value = ''; [cite: 172]
+// Clear input [cite: 173]
+            } catch (error) { [cite: 173]
+                console.error("Error adding course: ", error); [cite: 174]
+ showMessage("خطأ في الإضافة", `حدث خطأ أثناء إضافة الدورة: ${error.message}.`, false); [cite: 174]
  } finally {
-                addCourseButton.disabled = false;
- addCourseButton.textContent = "إضافة دورة";
+                addCourseButton.disabled = false; [cite: 175]
+ addCourseButton.textContent = "إضافة دورة"; [cite: 176]
             }
         };
 /**
-         * Loads attendance records from Firestore for the Admin view.
+         * Loads attendance records from Firestore for the Admin view. [cite: 177, 178]
  */
         const loadAttendanceRecords = () => {
-            if (!db) return;
-// Query without orderBy to avoid index requirement
-            const q = query(collection(db, ATTENDANCE_COLLECTION_PATH));
-// onSnapshot for real-time updates
-            onSnapshot(q, (snapshot) => {
-                recordsTableBody.innerHTML = '';
+            if (!db) return; [cite: 178]
+// Query without orderBy to avoid index requirement [cite: 179]
+            const q = query(collection(db, ATTENDANCE_COLLECTION_PATH)); [cite: 179]
+// onSnapshot for real-time updates [cite: 180]
+            onSnapshot(q, (snapshot) => { [cite: 180]
+                recordsTableBody.innerHTML = ''; [cite: 180]
                 
-                currentRecords = []; // Clear global records
-                snapshot.forEach((doc) => {
+                currentRecords = []; // Clear global records [cite: 180]
+                snapshot.forEach((doc) => { [cite: 180]
        
-              currentRecords.push(doc.data());
+              currentRecords.push(doc.data()); [cite: 181]
                 });
 
-                // Sort by timestamp descending (in-memory sort required since orderBy is avoided)
+                // Sort by timestamp descending (in-memory sort required since orderBy is avoided) [cite: 181]
                 currentRecords.sort((a, b) => {
                     const timeA = b.timestamp?.toDate ? 
- b.timestamp.toDate().getTime() : 0;
-                    const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
-                    return timeA - timeB; // Sort descending
+ b.timestamp.toDate().getTime() : 0; [cite: 182]
+                    const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0; [cite: 182]
+                    return timeA - timeB; // Sort descending [cite: 182]
                 });
 
-                recordCountSpan.textContent = currentRecords.length;
+                recordCountSpan.textContent = currentRecords.length; [cite: 182, 183]
            
-       exportButton.disabled = currentRecords.length === 0;
+       exportButton.disabled = currentRecords.length === 0; [cite: 183]
 
-                if (currentRecords.length === 0) {
-                    recordsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">لا توجد سجلات حضور مسجلة.</td></tr>';
- return;
+                if (currentRecords.length === 0) { [cite: 183]
+                    recordsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">لا توجد سجلات حضور مسجلة.</td></tr>'; [cite: 184]
+ return; [cite: 184]
                 }
 
-                currentRecords.forEach(record => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-100 transition duration-100';
+                currentRecords.forEach(record => { [cite: 184]
+                    const row = document.createElement('tr'); [cite: 184]
+                    row.className = 'hover:bg-gray-100 transition duration-100'; [cite: 184]
 
                     // Format timestamp
             
-         const date = record.timestamp?.toDate ? record.timestamp.toDate() : new Date();
-                    const formattedDate = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+         const date = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(); [cite: 185]
+                    const formattedDate = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); [cite: 185]
                     
                     // NEW TABLE ORDER: Date, Course Name, Employee ID, 
- Name Ar, Work Place
+ Name Ar, Work Place [cite: 186]
                     row.innerHTML = `
                         <td class="px-3 py-3 whitespace-nowrap">${formattedDate}</td>
                         <td class="px-3 py-3 whitespace-nowrap">${record.courseName || '---'}</td>
                    
-       <td class="px-3 py-3 whitespace-nowrap text-left" dir="ltr">${record.employeeIdEn || '---'}</td>
+       <td class="px-3 py-3 whitespace-nowrap text-left" dir="ltr">${record.employeeIdEn || '---'}</td> [cite: 187]
                         <td class="px-3 py-3 whitespace-nowrap font-medium">${record.nameAr ||
- '---'}</td>
+ '---'}</td> [cite: 188]
                         <td class="px-3 py-3 whitespace-nowrap">${record.workPlace ||
- '---'}</td>
-                    `;
- recordsTableBody.appendChild(row);
+ '---'}</td> [cite: 189]
+                    `; [cite: 189]
+ recordsTableBody.appendChild(row); [cite: 190]
                 });
 
-                console.log(`Loaded ${currentRecords.length} attendance records.`);
+                console.log(`Loaded ${currentRecords.length} attendance records.`); [cite: 190]
 
             }, (error) => {
-                console.error("Error loading attendance records:", error);
- recordsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">خطأ في تحميل السجلات.</td></tr>';
- showMessage("خطأ في السجلات", "فشل تحميل سجلات الحضور. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
+                console.error("Error loading attendance records:", error); [cite: 191]
+ recordsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">خطأ في تحميل السجلات.</td></tr>'; [cite: 191]
+ showMessage("خطأ في السجلات", "فشل تحميل سجلات الحضور. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false); [cite: 192]
             });
         };
 /**
-         * Sends data to the Google Sheets Web App URL.
+         * Sends data to the Google Sheets Web App URL. [cite: 193]
  */
         window.exportRecordsToSheet = async () => {
-            if (!GOOGLE_SHEETS_SCRIPT_URL) {
-                showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false);
- return;
+            if (!GOOGLE_SHEETS_SCRIPT_URL) { [cite: 194]
+                showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false); [cite: 194]
+ return; [cite: 195]
             }
-            if (currentRecords.length === 0) {
-                showMessage("لا توجد بيانات", "لا توجد سجلات حضور لتصديرها.", false);
- return;
+            if (currentRecords.length === 0) { [cite: 195]
+                showMessage("لا توجد بيانات", "لا توجد سجلات حضور لتصديرها.", false); [cite: 195]
+ return; [cite: 196]
             }
 
-            exportButton.disabled = true;
-            const originalText = exportButton.textContent;
- exportButton.textContent = "جاري التصدير...";
+            exportButton.disabled = true; [cite: 196]
+            const originalText = exportButton.textContent; [cite: 196]
+ exportButton.textContent = "جاري التصدير..."; [cite: 197]
 
-            // Prepare records for sending, ensuring date is formatted correctly for Sheets
-            const formattedRecords = currentRecords.map(record => {
-                const date = record.timestamp?.toDate ? record.timestamp.toDate() : new Date();
+            // Prepare records for sending, ensuring date is formatted correctly for Sheets [cite: 197]
+            const formattedRecords = currentRecords.map(record => { [cite: 197]
+                const date = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(); [cite: 197]
                 
                 // Format date/time to include seconds for precise log
     
              const formattedDate = date.toLocaleDateString('ar-EG', { 
                     year: 'numeric', month: '2-digit', day: '2-digit', 
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                });
+                }); [cite: 198]
 
                
-  return {
-                    // This order is crucial and must match DEFAULT_HEADERS in sheets_exporter.js
-                    "التاريخ": formattedDate,
-                    "اسم الدورة": record.courseName || '',
+  return { [cite: 199]
+                    // This order is crucial and must match DEFAULT_HEADERS in sheets_exporter.js [cite: 199]
+                    "التاريخ": formattedDate, [cite: 199]
+                    "اسم الدورة": record.courseName || '', [cite: 199]
                     "الرقم الوظيفي": record.employeeIdEn 
- || '',
-                    "الاسم (عربي)": record.nameAr || '',
-                    "الاسم (إنجليزي)": record.nameEn || '',
+ || '', [cite: 200]
+                    "الاسم (عربي)": record.nameAr || '', [cite: 200]
+                    "الاسم (إنجليزي)": record.nameEn || '', [cite: 200]
                     "الرقم الوطني": record.nationalIdEn ||
- '',
+ '', [cite: 201]
                     "مكان العمل": record.workPlace ||
- '',
+ '', [cite: 202]
                     "المسمى الوظيفي": record.jobTitle ||
- '',
+ '', [cite: 203]
                     "المؤهل العلمي": record.qualification ||
- '',
+ '', [cite: 204]
                     "رقم الهاتف": record.phoneEn ||
- '',
+ '', [cite: 205]
                     "App ID": record.appId ||
- appId,
+ appId, [cite: 206]
                     "User ID": record.userId ||
- userId
+ userId [cite: 207]
                 };
             });
- try {
-                const response = await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
+ try { [cite: 208]
+                const response = await fetch(GOOGLE_SHEETS_SCRIPT_URL, { [cite: 208]
+                    method: 'POST', [cite: 208]
+                    mode: 'cors', [cite: 208]
+                    headers: { 'Content-Type': 'application/json' }, [cite: 208]
             
-         body: JSON.stringify({ records: formattedRecords })
+         body: JSON.stringify({ records: formattedRecords }) [cite: 209]
                 });
- const result = await response.json();
+ const result = await response.json(); [cite: 210]
 
-                if (result.status === 'success') {
-                    showMessage("نجاح التصدير!", `تم ترحيل ${currentRecords.length} سجل بنجاح إلى جدول البيانات.`, true);
+                if (result.status === 'success') { [cite: 210]
+                    showMessage("نجاح التصدير!", `تم ترحيل ${currentRecords.length} سجل بنجاح إلى جدول البيانات.`, true); [cite: 211]
  } else {
-                    console.error("Sheets Script Error:", result.message);
- showMessage("فشل التصدير", `فشل سكريبت Sheets: ${result.message || 'حدث خطأ غير معروف في السكريبت.'}`, false);
+                    console.error("Sheets Script Error:", result.message); [cite: 211]
+ showMessage("فشل التصدير", `فشل سكريبت Sheets: ${result.message || 'حدث خطأ غير معروف في السكريبت.'}`, false); [cite: 212]
  }
 
             } catch (error) {
-                console.error("Network/Fetch Error:", error);
- showMessage("خطأ في الاتصال", `فشل في إرسال البيانات إلى Google Sheets: ${error.message}. تأكد من تفعيل الرابط.`, false);
+                console.error("Network/Fetch Error:", error); [cite: 213]
+ showMessage("خطأ في الاتصال", `فشل في إرسال البيانات إلى Google Sheets: ${error.message}. تأكد من تفعيل الرابط.`, false); [cite: 214]
  } finally {
-                exportButton.disabled = false;
- exportButton.textContent = originalText;
+                exportButton.disabled = false; [cite: 215]
+ exportButton.textContent = originalText; [cite: 216]
             }
         };
 /**
-         * Fetches user data based on employee ID and auto-fills the form.
+         * Fetches user data based on employee ID and auto-fills the form. [cite: 217, 218]
  */
         const fetchUserDataByEmployeeId = async (event) => {
-            const employeeId = event.target.value.trim();
-// Clear fields if the input is empty or too short (assuming ID is 4+ digits)
-            if (employeeId.length < 4 || !/^\d+$/.test(employeeId)) {
-                // Clear fields only if they are not the current employee ID being typed
-                if (nameArInput.value) nameArInput.value = '';
- if (nameEnInput.value) nameEnInput.value = '';
-                if (nationalIdInput.value) nationalIdInput.value = '';
-                if (workPlaceSelect.value) workPlaceSelect.value = ''; 
-                workPlaceOtherInput.value = '';
-// Clear workPlace other input
-                workPlaceOtherInput.classList.add('hidden');
- workPlaceOtherInput.required = false; 
-                if (jobTitleInput.value) jobTitleInput.value = '';
-                if (phoneEnInput.value) phoneEnInput.value = '';
-                if (qualificationSelect.value) qualificationSelect.value = '';
- qualificationOtherInput.value = ''; // Clear qualification other input
-                qualificationOtherInput.classList.add('hidden');
- qualificationOtherInput.required = false;
-                return;
+            const employeeId = event.target.value.trim(); [cite: 218]
+// Clear fields if the input is empty or too short (assuming ID is 4+ digits) [cite: 219]
+            if (employeeId.length < 4 || !/^\d+$/.test(employeeId)) { [cite: 219]
+                // Clear fields only if they are not the current employee ID being typed [cite: 219]
+                if (nameArInput.value) nameArInput.value = ''; [cite: 219]
+ if (nameEnInput.value) nameEnInput.value = ''; [cite: 220]
+                if (nationalIdInput.value) nationalIdInput.value = ''; [cite: 220]
+                if (workPlaceSelect.value) workPlaceSelect.value = ''; [cite: 220] 
+                workPlaceOtherInput.value = ''; [cite: 220]
+// Clear workPlace other input [cite: 221]
+                workPlaceOtherInput.classList.add('hidden'); [cite: 221]
+ workPlaceOtherInput.required = false; [cite: 222] 
+                if (jobTitleInput.value) jobTitleInput.value = ''; [cite: 222]
+                if (phoneEnInput.value) phoneEnInput.value = ''; [cite: 222]
+                if (qualificationSelect.value) qualificationSelect.value = ''; [cite: 222]
+ qualificationOtherInput.value = ''; // Clear qualification other input [cite: 223]
+                qualificationOtherInput.classList.add('hidden'); [cite: 223]
+ qualificationOtherInput.required = false; [cite: 224]
+                return; [cite: 224]
             }
 
             try {
-                // الاستعلام: ابحث عن جميع السجلات التي تطابق الرقم الوظيفي
+                // الاستعلام: ابحث عن جميع السجلات التي تطابق الرقم الوظيفي [cite: 224]
                 const q = firestoreQuery(
                     collection(db, ATTENDANCE_COLLECTION_PATH),
                   
-   where('employeeIdEn', '==', employeeId)
+   where('employeeIdEn', '==', employeeId) [cite: 225]
                 );
- const snapshot = await getDocs(q);
+ const snapshot = await getDocs(q); [cite: 226]
 
-                if (!snapshot.empty) {
-                    const allRecords = [];
- snapshot.forEach(doc => allRecords.push(doc.data()));
+                if (!snapshot.empty) { [cite: 226]
+                    const allRecords = []; [cite: 226]
+ snapshot.forEach(doc => allRecords.push(doc.data())); [cite: 227]
 
-                    // الفرز في الذاكرة (In-Memory Sort) للحصول على أحدث سجل
-                    allRecords.sort((a, b) => {
-                        const timeA = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
-                        const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+                    // الفرز في الذاكرة (In-Memory Sort) للحصول على أحدث سجل [cite: 227]
+                    allRecords.sort((a, b) => { [cite: 227]
+                        const timeA = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0; [cite: 227]
+                        const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0; [cite: 227]
    
-                      return timeA - timeB; // Sort descending
+                      return timeA - timeB; // Sort descending [cite: 228]
                     });
- const latestRecord = allRecords[0]; // أحدث سجل هو العنصر الأول بعد الفرز
+ const latestRecord = allRecords[0]; // أحدث سجل هو العنصر الأول بعد الفرز [cite: 229]
                     
-                    // Auto-fill form fields with the latest data
-                    if (latestRecord.nameAr) nameArInput.value = latestRecord.nameAr;
- if (latestRecord.nameEn) nameEnInput.value = latestRecord.nameEn;
-                    if (latestRecord.nationalIdEn) nationalIdInput.value = latestRecord.nationalIdEn; 
-                    if (latestRecord.jobTitle) jobTitleInput.value = latestRecord.jobTitle;
-                    if (latestRecord.phoneEn) phoneEnInput.value = latestRecord.phoneEn;
-// --- 1. Handle workPlace auto-fill logic ---
+                    // Auto-fill form fields with the latest data [cite: 229]
+                    if (latestRecord.nameAr) nameArInput.value = latestRecord.nameAr; [cite: 229, 230]
+ if (latestRecord.nameEn) nameEnInput.value = latestRecord.nameEn; [cite: 230]
+                    if (latestRecord.nationalIdEn) nationalIdInput.value = latestRecord.nationalIdEn; [cite: 230] 
+                    if (latestRecord.jobTitle) jobTitleInput.value = latestRecord.jobTitle; [cite: 230]
+                    if (latestRecord.phoneEn) phoneEnInput.value = latestRecord.phoneEn; [cite: 230]
+// --- 1. Handle workPlace auto-fill logic --- [cite: 231]
                     const workPlaceValue = latestRecord.workPlace ||
- '';
-                    const predefinedWorkOptions = Array.from(workPlaceSelect.options).map(o => o.value);
-                    const isWorkPredefined = predefinedWorkOptions.includes(workPlaceValue);
- if (isWorkPredefined) {
-                        workPlaceSelect.value = workPlaceValue;
- workPlaceOtherInput.classList.add('hidden');
-                        workPlaceOtherInput.required = false;
-                        workPlaceOtherInput.value = '';
-                    } else if (workPlaceValue) {
-                        workPlaceSelect.value = 'OTHER';
- workPlaceOtherInput.classList.remove('hidden');
-                        workPlaceOtherInput.required = true;
-                        workPlaceOtherInput.value = workPlaceValue;
-                    } else {
-                        workPlaceSelect.value = '';
- workPlaceOtherInput.classList.add('hidden');
-                        workPlaceOtherInput.required = false;
-                        workPlaceOtherInput.value = '';
+ ''; [cite: 232]
+                    const predefinedWorkOptions = Array.from(workPlaceSelect.options).map(o => o.value); [cite: 232]
+                    const isWorkPredefined = predefinedWorkOptions.includes(workPlaceValue); [cite: 233]
+ if (isWorkPredefined) { [cite: 233]
+                        workPlaceSelect.value = workPlaceValue; [cite: 233]
+ workPlaceOtherInput.classList.add('hidden'); [cite: 234]
+                        workPlaceOtherInput.required = false; [cite: 234]
+                        workPlaceOtherInput.value = ''; [cite: 234]
+                    } else if (workPlaceValue) { [cite: 234]
+                        workPlaceSelect.value = 'OTHER'; [cite: 234]
+ workPlaceOtherInput.classList.remove('hidden'); [cite: 235]
+                        workPlaceOtherInput.required = true; [cite: 235]
+                        workPlaceOtherInput.value = workPlaceValue; [cite: 235]
+                    } else { [cite: 235]
+                        workPlaceSelect.value = ''; [cite: 235]
+ workPlaceOtherInput.classList.add('hidden'); [cite: 236]
+                        workPlaceOtherInput.required = false; [cite: 236]
+                        workPlaceOtherInput.value = ''; [cite: 236]
                     }
                     
-                    // --- 2. Handle Qualification auto-fill logic ---
+                    // --- 2. Handle Qualification auto-fill logic --- [cite: 236]
                     const qualValue = latestRecord.qualification ||
- '';
-                    const predefinedQualOptions = Array.from(qualificationSelect.options).map(o => o.value);
-                    const isQualPredefined = predefinedQualOptions.includes(qualValue);
- if (isQualPredefined) {
-                        qualificationSelect.value = qualValue;
- qualificationOtherInput.classList.add('hidden');
-                        qualificationOtherInput.required = false;
-                        qualificationOtherInput.value = '';
-                    } else if (qualValue) {
-                        // Value is custom, set select to 'OTHER_QUAL' and show the input
-                        qualificationSelect.value = 'OTHER_QUAL';
- qualificationOtherInput.classList.remove('hidden');
-                        qualificationOtherInput.required = true;
-                        qualificationOtherInput.value = qualValue;
-                    } else {
-                        qualificationSelect.value = '';
- // Reset if value is empty/null
-                        qualificationOtherInput.classList.add('hidden');
- qualificationOtherInput.required = false;
-                        qualificationOtherInput.value = '';
+ ''; [cite: 237]
+                    const predefinedQualOptions = Array.from(qualificationSelect.options).map(o => o.value); [cite: 237]
+                    const isQualPredefined = predefinedQualOptions.includes(qualValue); [cite: 238]
+ if (isQualPredefined) { [cite: 238]
+                        qualificationSelect.value = qualValue; [cite: 238]
+ qualificationOtherInput.classList.add('hidden'); [cite: 239]
+                        qualificationOtherInput.required = false; [cite: 239]
+                        qualificationOtherInput.value = ''; [cite: 239]
+                    } else if (qualValue) { [cite: 239]
+                        // Value is custom, set select to 'OTHER_QUAL' and show the input [cite: 239]
+                        qualificationSelect.value = 'OTHER_QUAL'; [cite: 239, 240]
+ qualificationOtherInput.classList.remove('hidden'); [cite: 240]
+                        qualificationOtherInput.required = true; [cite: 240]
+                        qualificationOtherInput.value = qualValue; [cite: 240]
+                    } else { [cite: 240]
+                        qualificationSelect.value = ''; [cite: 241]
+ // Reset if value is empty/null [cite: 241]
+                        qualificationOtherInput.classList.add('hidden'); [cite: 241]
+ qualificationOtherInput.required = false; [cite: 242]
+                        qualificationOtherInput.value = ''; [cite: 242]
                     }
                     
-                    console.log(`User data loaded successfully for Employee ID: ${employeeId}`);
+                    console.log(`User data loaded successfully for Employee ID: ${employeeId}`); [cite: 242, 243]
  } else {
-                    console.log(`No previous records found for Employee ID: ${employeeId}.`);
+                    console.log(`No previous records found for Employee ID: ${employeeId}.`); [cite: 243, 244]
  }
 
             } catch (error) {
-                console.error("Error fetching user data by Employee ID:", error);
-// No need to show a message box, just log the error silently
+                console.error("Error fetching user data by Employee ID:", error); [cite: 244, 245]
+// No need to show a message box, just log the error silently [cite: 245]
             }
         };
 /**
-         * Toggles visibility of the 'Other Work Place' input field.
+         * Toggles visibility of the 'Other Work Place' input field. [cite: 246, 247]
  */
         const toggleWorkPlaceOther = () => {
-            if (workPlaceSelect.value === 'OTHER') {
-                workPlaceOtherInput.classList.remove('hidden');
- workPlaceOtherInput.required = true;
+            if (workPlaceSelect.value === 'OTHER') { [cite: 247]
+                workPlaceOtherInput.classList.remove('hidden'); [cite: 247]
+ workPlaceOtherInput.required = true; [cite: 248]
             } else {
-                workPlaceOtherInput.classList.add('hidden');
- workPlaceOtherInput.required = false;
-                workPlaceOtherInput.value = ''; // Clear value when hidden
+                workPlaceOtherInput.classList.add('hidden'); [cite: 248]
+ workPlaceOtherInput.required = false; [cite: 249]
+                workPlaceOtherInput.value = ''; // Clear value when hidden [cite: 249]
             }
         };
 /**
-         * Toggles visibility of the 'Other Qualification' input field.
+         * Toggles visibility of the 'Other Qualification' input field. [cite: 250, 251]
  */
         const toggleQualificationOther = () => {
-             if (qualificationSelect.value === 'OTHER_QUAL') {
-                 qualificationOtherInput.classList.remove('hidden');
- qualificationOtherInput.required = true;
+             if (qualificationSelect.value === 'OTHER_QUAL') { [cite: 251]
+                 qualificationOtherInput.classList.remove('hidden'); [cite: 251]
+ qualificationOtherInput.required = true; [cite: 252]
              } else {
-                 qualificationOtherInput.classList.add('hidden');
- qualificationOtherInput.required = false;
-                 qualificationOtherInput.value = ''; // Clear value when hidden
+                 qualificationOtherInput.classList.add('hidden'); [cite: 252]
+ qualificationOtherInput.required = false; [cite: 253]
+                 qualificationOtherInput.value = ''; // Clear value when hidden [cite: 253]
              }
         };
 /**
-         * Initializes Firebase (with Auth) and loads data.
+         * Initializes Firebase (with Auth) and loads data. [cite: 254, 255]
  */
         const initializeFirebase = async () => {
             try {
-                app = initializeApp(firebaseConfigFromEnv);
- db = getFirestore(app);
-                auth = getAuth(app);
+                app = initializeApp(firebaseConfigFromEnv); [cite: 255, 256]
+ db = getFirestore(app); [cite: 256]
+                auth = getAuth(app); [cite: 256]
                 
-                // Use session persistence so the login state remains during the session
-                await setPersistence(auth, browserSessionPersistence);
- if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
+                // Use session persistence so the login state remains during the session [cite: 256]
+                await setPersistence(auth, browserSessionPersistence); [cite: 257]
+ if (initialAuthToken) { [cite: 257]
+                    await signInWithCustomToken(auth, initialAuthToken); [cite: 257, 258]
  } else {
-                    await signInAnonymously(auth);
+                    await signInAnonymously(auth); [cite: 258, 259]
  }
 
-                userId = auth.currentUser?.uid ||
- crypto.randomUUID();
+                userId = auth.currentUser?.uid || [cite: 259]
+ crypto.randomUUID(); [cite: 260]
                 
-                loadCourses();
-                loadAttendanceRecords();
+                loadCourses(); [cite: 260]
+                loadAttendanceRecords(); [cite: 260]
                 
-                isReady = true;
-                submitButton.disabled = courseNameSelect.options.length <= 1;
-// Disable if only the default option is present
-                buttonText.textContent = "تسجيل الحضور";
+                isReady = true; [cite: 260]
+                submitButton.disabled = courseNameSelect.options.length <= 1; [cite: 260, 261]
+// Disable if only the default option is present [cite: 261]
+                buttonText.textContent = "تسجيل الحضور"; [cite: 261, 262]
  } catch (error) {
-                console.error("Firebase Initialization Error:", error);
- showMessage("خطأ في الاتصال", "حدث خطأ أثناء الاتصال بالنظام: " + error.message, false);
-                isReady = false;
+                console.error("Firebase Initialization Error:", error); [cite: 262]
+ showMessage("خطأ في الاتصال", "حدث خطأ أثناء الاتصال بالنظام: " + error.message, false); [cite: 263]
+                isReady = false; [cite: 263]
  }
         };
 
         /**
-         * Handles the form submission and saves data to Firestore.
+         * Handles the form submission and saves data to Firestore. [cite: 264, 265]
  */
         const handleSubmit = async (event) => {
-            event.preventDefault();
- if (!isReady) {
-                showMessage("النظام غير جاهز", "الرجاء الانتظار حتى يتم تحميل النظام.", false);
- return;
+            event.preventDefault(); [cite: 265]
+ if (!isReady) { [cite: 266]
+                showMessage("النظام غير جاهز", "الرجاء الانتظار حتى يتم تحميل النظام.", false); [cite: 266]
+ return; [cite: 267]
             }
 
-            // Basic client-side validation for required fields
-            if (!form.checkValidity()) {
-                showMessage("خطأ في البيانات", "الرجاء تعبئة جميع الحقول الإلزامية المشار إليها بعلامة (*) بشكل صحيح.", false);
- form.reportValidity();
-                return;
+            // Basic client-side validation for required fields [cite: 267]
+            if (!form.checkValidity()) { [cite: 267]
+                showMessage("خطأ في البيانات", "الرجاء تعبئة جميع الحقول الإلزامية المشار إليها بعلامة (*) بشكل صحيح.", false); [cite: 267]
+ form.reportValidity(); [cite: 268]
+                return; [cite: 268]
             }
-            if (courseNameSelect.value === "") {
-                showMessage("خطأ في البيانات", "الرجاء اختيار اسم الدورة من القائمة.", false);
- courseNameSelect.focus();
-                return;
+            if (courseNameSelect.value === "") { [cite: 268]
+                showMessage("خطأ في البيانات", "الرجاء اختيار اسم الدورة من القائمة.", false); [cite: 269]
+ courseNameSelect.focus(); [cite: 269]
+                return; [cite: 269]
             }
             
-            // Signature check
-            const employeeId = employeeIdInput.value.trim();
- const signature = document.getElementById('signature').value.trim();
+            // Signature check [cite: 269]
+            const employeeId = employeeIdInput.value.trim(); [cite: 269, 270]
+ const signature = document.getElementById('signature').value.trim(); [cite: 270]
 
-            if (employeeId !== signature) {
-                showMessage("خطأ في التوقيع", "يجب أن يكون حقل التوقيع (الرقم الوظيفي) مطابقاً للرقم الوظيفي المدخل في الأعلى.", false);
- document.getElementById('signature').focus();
-                return;
+            if (employeeId !== signature) { [cite: 270]
+                showMessage("خطأ في التوقيع", "يجب أن يكون حقل التوقيع (الرقم الوظيفي) مطابقاً للرقم الوظيفي المدخل في الأعلى.", false); [cite: 270]
+ document.getElementById('signature').focus(); [cite: 271]
+                return; [cite: 271]
             }
 
-            // Gather form data
-            const formData = new FormData(form);
- const data = {};
+            // Gather form data [cite: 271]
+            const formData = new FormData(form); [cite: 271, 272]
+ const data = {}; [cite: 272]
 
-            // 1. Custom logic for workPlace: use the 'Other' input value if 'OTHER' is selected
-            let finalWorkPlace = workPlaceSelect.value;
- if (finalWorkPlace === 'OTHER') {
-                finalWorkPlace = workPlaceOtherInput.value.trim();
+            // 1. Custom logic for workPlace: use the 'Other' input value if 'OTHER' is selected [cite: 272]
+            let finalWorkPlace = workPlaceSelect.value; [cite: 272, 273]
+ if (finalWorkPlace === 'OTHER') { [cite: 273]
+                finalWorkPlace = workPlaceOtherInput.value.trim(); [cite: 273, 274]
  }
 
-            // 2. Custom logic for Qualification: use the 'Other' input value if 'OTHER_QUAL' is selected
-            let finalQualification = qualificationSelect.value;
- if (finalQualification === 'OTHER_QUAL') {
-                finalQualification = qualificationOtherInput.value.trim();
+            // 2. Custom logic for Qualification: use the 'Other' input value if 'OTHER_QUAL' is selected [cite: 274]
+            let finalQualification = qualificationSelect.value; [cite: 274, 275]
+ if (finalQualification === 'OTHER_QUAL') { [cite: 275]
+                finalQualification = qualificationOtherInput.value.trim(); [cite: 275, 276]
  }
 
 
-            // Process form entries, skipping the temporary 'other' fields
-            for (const [key, value] of formData.entries()) {
-                if (key !== 'workPlaceOther' && key !== 'qualificationOther' && key !== 'signature') {
-                    data[key] = value.trim();
+            // Process form entries, skipping the temporary 'other' fields [cite: 276]
+            for (const [key, value] of formData.entries()) { [cite: 276]
+                if (key !== 'workPlaceOther' && key !== 'qualificationOther' && key !== 'signature') { [cite: 276]
+                    data[key] = value.trim(); [cite: 277]
  }
             }
-            // Overwrite workPlace and qualification with the final determined value
-            data.workPlace = finalWorkPlace;
- data.qualification = finalQualification; // Save the final qualification value
+            // Overwrite workPlace and qualification with the final determined value [cite: 277]
+            data.workPlace = finalWorkPlace; [cite: 277, 278]
+ data.qualification = finalQualification; // Save the final qualification value [cite: 278]
             
-            data.timestamp = serverTimestamp();
- data.userId = userId; 
-            data.appId = appId;
+            data.timestamp = serverTimestamp(); [cite: 278, 279]
+ data.userId = userId; [cite: 279] 
+            data.appId = appId; [cite: 279]
 
 
-            // Show loading state
-            submitButton.disabled = true;
- buttonText.textContent = "جاري الإرسال...";
-            loadingSpinner.classList.remove('hidden');
+            // Show loading state [cite: 279]
+            submitButton.disabled = true; [cite: 279, 280]
+ buttonText.textContent = "جاري الإرسال..."; [cite: 280]
+            loadingSpinner.classList.remove('hidden'); [cite: 280]
             
             try {
-                // Ensure the workPlace value is the final determined one before saving
-                const recordData = {
-                    ...data,
+                // Ensure the workPlace value is the final determined one before saving [cite: 280]
+                const recordData = { [cite: 280]
+                    ...data, [cite: 281]
                     workPlace: finalWorkPlace,
        
-              qualification: finalQualification
+              qualification: finalQualification [cite: 281]
                 };
- const docRef = await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
+ const docRef = await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData); [cite: 282]
                 
-                console.log("Document successfully written with ID:", docRef.id);
-// Success message
-                showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
-// Clear the form after successful submission
-                form.reset();
- courseNameSelect.value = ""; 
-                workPlaceSelect.value = ""; 
-                qualificationSelect.value = ""; 
+                console.log("Document successfully written with ID:", docRef.id); [cite: 282, 283]
+// Success message [cite: 283]
+                showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true); [cite: 283, 284]
+// Clear the form after successful submission [cite: 284]
+                form.reset(); [cite: 284]
+ courseNameSelect.value = ""; [cite: 285] 
+                workPlaceSelect.value = ""; [cite: 285] 
+                qualificationSelect.value = ""; [cite: 285] 
                 
-                // Clear and hide 'Other' fields
-                workPlaceOtherInput.classList.add('hidden');
- workPlaceOtherInput.required = false;
-                qualificationOtherInput.classList.add('hidden'); 
-                qualificationOtherInput.required = false;
+                // Clear and hide 'Other' fields [cite: 285]
+                workPlaceOtherInput.classList.add('hidden'); [cite: 285, 286]
+ workPlaceOtherInput.required = false; [cite: 286]
+                qualificationOtherInput.classList.add('hidden'); [cite: 286] 
+                qualificationOtherInput.required = false; [cite: 286]
 
             } catch (error) {
-                console.error("Error adding document: ", error);
- showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
+                console.error("Error adding document: ", error); [cite: 287]
+ showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false); [cite: 287, 288]
  } finally {
-                // Reset loading state
-                loadingSpinner.classList.add('hidden');
- buttonText.textContent = "تسجيل الحضور";
-                if (isReady && courseNameSelect.options.length > 1) submitButton.disabled = false;
+                // Reset loading state [cite: 288]
+                loadingSpinner.classList.add('hidden'); [cite: 288, 289]
+ buttonText.textContent = "تسجيل الحضور"; [cite: 289]
+                if (isReady && courseNameSelect.options.length > 1) submitButton.disabled = false; [cite: 289, 290]
  }
         };
 
-        // Attach event listeners
-        form.addEventListener('submit', handleSubmit);
- courseForm.addEventListener('submit', handleAddCourse);
+        // Attach event listeners [cite: 290]
+        form.addEventListener('submit', handleSubmit); [cite: 290]
+ courseForm.addEventListener('submit', handleAddCourse); [cite: 291]
         
-        // EVENT LISTENERS for dynamic fields
-        employeeIdInput.addEventListener('change', fetchUserDataByEmployeeId); 
-        workPlaceSelect.addEventListener('change', toggleWorkPlaceOther);
- qualificationSelect.addEventListener('change', toggleQualificationOther); 
+        // EVENT LISTENERS for dynamic fields [cite: 291]
+        employeeIdInput.addEventListener('change', fetchUserDataByEmployeeId); [cite: 291] 
+        workPlaceSelect.addEventListener('change', toggleWorkPlaceOther); [cite: 292]
+ qualificationSelect.addEventListener('change', toggleQualificationOther); [cite: 292] 
         
-        // Initial Firebase setup call
-        initializeFirebase();
-// Initial state check for submit button
-        if (!isReady) {
-            buttonText.textContent = "جاري التحميل...";
- submitButton.disabled = true;
+        // Initial Firebase setup call [cite: 292]
+        initializeFirebase(); [cite: 293]
+// Initial state check for submit button [cite: 293]
+        if (!isReady) { [cite: 293]
+            buttonText.textContent = "جاري التحميل..."; [cite: 293, 294]
+ submitButton.disabled = true; [cite: 294]
         }
 
     </script>
