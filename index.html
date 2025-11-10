@@ -312,11 +312,7 @@ transition duration-150 bg-white cursor-pointer"
 
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    <script>
+    <script type="module">
         // ----------------------------------------------------------------
         // NOTE: Firebase Config and App ID are now hardcoded based on user's request.
 // ----------------------------------------------------------------
@@ -330,6 +326,7 @@ transition duration-150 bg-white cursor-pointer"
         };
 // ***************************************************************
         // ** التعديل الهام: تم وضع رابط النشر لسكريبت Google Apps Script هنا **
+        // (هذا هو الرابط الجديد الذي طلبته)
         // ***************************************************************
         const GOOGLE_SHEETS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysm_czs0mxTumCBUcfxTSf3XmMFiwbCu4X6HE8G9HnckbGHd-ZY9pYc7UzoDwAZm2z2g/exec';
 // ***************************************************************
@@ -339,10 +336,15 @@ transition duration-150 bg-white cursor-pointer"
  __app_id : 'default-app-id';
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+// Firebase Imports (using mandated version 11.6.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+ import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+ import { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query, serverTimestamp, getDocs, where, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+ import { query as firestoreQuery } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase SDK V8 Namespaced Access ---
-        
-        // Initialize Firebase variables
+        // Set log level for debugging
+        setLogLevel('Debug');
+// Initialize Firebase variables
         let app, db, auth, userId = 'anonymous';
  let isReady = false; 
 
@@ -493,11 +495,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  */
         const loadCourses = () => {
             if (!db) return;
-            // The query function is accessed via db
-            const q = db.collection(COURSES_COLLECTION_PATH); 
+ const q = query(collection(db, COURSES_COLLECTION_PATH));
             
             // onSnapshot for real-time updates
-            q.onSnapshot((snapshot) => {
+            onSnapshot(q, (snapshot) => {
                 const courses = [];
                 const courseDocs = {}; // Store docId and name for CRUD operations
                 snapshot.forEach((doc) => {
@@ -536,7 +537,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                         
        
                   // --- START OF MODIFICATION ---
-                        // SIMPLIFIED: Always render the standard view.
+                        // SIMPLIFIED: Always render the standard view. 
                         // This prevents data conflicts during real-time updates if an item is being edited.
           
                 // Any in-progress edit will be safely cancelled by the snapshot re-render.
@@ -571,7 +572,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 async () => {
                
       // Logic executed on confirmation
-                    const courseItem = document.getElementById(`course-item-${courseId}`); // CORRECTION
+                    const courseItem = document.getElementById(`course-item-${courseId}`);
                     if (courseItem) {
                         courseItem.style.opacity = '0.5';
                     
@@ -579,8 +580,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     }
 
                     try {
-                        // V8 deleteDoc equivalent
-                        await db.collection(COURSES_COLLECTION_PATH).doc(courseId).delete();
+                        await deleteDoc(doc(db, COURSES_COLLECTION_PATH, courseId));
                         showMessage("تم الحذف 
  بنجاح", `تم حذف الدورة: "${courseName}".`, true);
                     } catch (error) {
@@ -595,9 +595,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Enables inline editing for a course name by replacing the text span with an input field.
  */
         window.handleEditCourse = (courseId, currentName) => {
-            const nameSpan = document.getElementById(`course-name-${courseId}`); // CORRECTION
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // CORRECTION
-            const listItem = document.getElementById(`course-item-${courseId}`); // CORRECTION
+            const nameSpan = document.getElementById(`course-name-${courseId}`);
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`);
+            const listItem = document.getElementById(`course-item-${courseId}`);
 
             if (!nameSpan || !actionsDiv || !listItem) return;
 // Hide the original span
@@ -606,14 +606,14 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             const input = document.createElement('input');
  input.type = 'text';
             input.value = currentName;
-            input.id = `edit-input-${courseId}`; // CORRECTION
+            input.id = `edit-input-${courseId}`;
             input.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
  input.dir = 'rtl';
             input.required = true;
 
             // Create temporary div to hold input
             const tempEditDiv = document.createElement('div');
- tempEditDiv.id = `edit-div-${courseId}`; // CORRECTION
+ tempEditDiv.id = `edit-div-${courseId}`;
             tempEditDiv.className = "flex flex-grow items-center gap-2";
             tempEditDiv.appendChild(input);
 // Insert input field before action buttons
@@ -640,8 +640,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
          * Saves the edited course name to Firestore.
  */
         window.handleSaveEdit = async (courseId, originalName) => {
-            const input = document.getElementById(`edit-input-${courseId}`); // CORRECTION
- const actionsDiv = document.getElementById(`course-actions-${courseId}`); // CORRECTION
+            const input = document.getElementById(`edit-input-${courseId}`);
+ const actionsDiv = document.getElementById(`course-actions-${courseId}`);
 
             if (!input || !input.value.trim()) {
                 showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
@@ -660,12 +660,13 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  actionsDiv.style.opacity = '0.5'; 
 
             try {
-                // Check for duplication before updating (V8 query syntax)
-                const existingCourseQuery = db.collection(COURSES_COLLECTION_PATH).where('name', '==', newName);
-                const existingSnapshot = await existingCourseQuery.get();
+                // Check for duplication before updating
+                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', newName));
+ const existingSnapshot = await getDocs(existingCourseQuery);
 
                 if (!existingSnapshot.empty) {
                     // Check if the found document is the one we are editing.
+ If not, it's a duplicate.
                     let isDuplicate = false;
                     existingSnapshot.forEach(doc => {
                         if (doc.id !== courseId) {
@@ -682,10 +683,9 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 }
 
 
-                // V8 updateDoc equivalent
-                await db.collection(COURSES_COLLECTION_PATH).doc(courseId).update({
+                await updateDoc(doc(db, COURSES_COLLECTION_PATH, courseId), {
                     name: newName,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    updatedAt: serverTimestamp() 
               
    });
 
@@ -699,6 +699,8 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                 // In case of error, re-enable (though onSnapshot will refresh anyway)
                 input.disabled = false;
  actionsDiv.style.opacity = '1';
+                // We don't call loadCourses() here because the onSnapshot listener 
+                // will fire upon successful updateDoc and handle the UI refresh.
  }
         };
 
@@ -717,19 +719,18 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  addCourseButton.textContent = "جاري الإضافة...";
 
             try {
-                // Check if course already exists (V8 query syntax)
-                const existingCourseQuery = db.collection(COURSES_COLLECTION_PATH).where('name', '==', courseName);
-                const existingSnapshot = await existingCourseQuery.get();
+                // Check if course already exists (case-insensitive for a simple check)
+                const existingCourseQuery = firestoreQuery(collection(db, COURSES_COLLECTION_PATH), where('name', '==', courseName));
+ const existingSnapshot = await getDocs(existingCourseQuery);
                 
                 if (!existingSnapshot.empty) {
                     showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false);
  return;
                 }
                 
-                // V8 addDoc equivalent
-                await db.collection(COURSES_COLLECTION_PATH).add({
+                await addDoc(collection(db, COURSES_COLLECTION_PATH), {
                     name: courseName,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    createdAt: serverTimestamp() 
                 });
  showMessage("تم بنجاح", `تم إضافة الدورة: "${courseName}"`, true);
                 newCourseInput.value = '';
@@ -747,11 +748,10 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  */
         const loadAttendanceRecords = () => {
             if (!db) return;
-            // Query collection (V8 syntax)
-            const q = db.collection(ATTENDANCE_COLLECTION_PATH); 
-            
-            // onSnapshot for real-time updates
-            q.onSnapshot((snapshot) => {
+// Query without orderBy to avoid index requirement
+            const q = query(collection(db, ATTENDANCE_COLLECTION_PATH));
+// onSnapshot for real-time updates
+            onSnapshot(q, (snapshot) => {
                 recordsTableBody.innerHTML = '';
                 
                 currentRecords = []; // Clear global records
@@ -762,7 +762,6 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 
                 // Sort by timestamp descending (in-memory sort required since orderBy is avoided)
                 currentRecords.sort((a, b) => {
-                    // Accessing timestamp in V8/V9 compatible way
                     const timeA = b.timestamp?.toDate ? 
  b.timestamp.toDate().getTime() : 0;
                     const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
@@ -914,10 +913,13 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             }
 
             try {
-                // الاستعلام: ابحث عن جميع السجلات التي تطابق الرقم الوظيفي (V8 syntax)
-                const q = db.collection(ATTENDANCE_COLLECTION_PATH)
-                            .where('employeeIdEn', '==', employeeId);
-                const snapshot = await q.get();
+                // الاستعلام: ابحث عن جميع السجلات التي تطابق الرقم الوظيفي
+                const q = firestoreQuery(
+                    collection(db, ATTENDANCE_COLLECTION_PATH),
+                  
+   where('employeeIdEn', '==', employeeId)
+                );
+ const snapshot = await getDocs(q);
 
                 if (!snapshot.empty) {
                     const allRecords = [];
@@ -934,7 +936,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
                     
                     // Auto-fill form fields with the latest data
                     if (latestRecord.nameAr) nameArInput.value = latestRecord.nameAr;
- if (latestRecord.nameEn) nameEnInput.value = latestRecord.nameEn;
+ if (latestRecord.nameEn) nameArInput.value = latestRecord.nameEn;
                     if (latestRecord.nationalIdEn) nationalIdInput.value = latestRecord.nationalIdEn; 
                     if (latestRecord.jobTitle) jobTitleInput.value = latestRecord.jobTitle;
                     if (latestRecord.phoneEn) phoneEnInput.value = latestRecord.phoneEn;
@@ -1025,24 +1027,20 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
  */
         const initializeFirebase = async () => {
             try {
-                // V8 syntax for initialization
-                app = firebase.initializeApp(firebaseConfigFromEnv);
-                db = firebase.firestore(app);
-                auth = firebase.auth(app);
+                app = initializeApp(firebaseConfigFromEnv);
+ db = getFirestore(app);
+                auth = getAuth(app);
                 
-                // Use session persistence so the login state remains during the session (V8 syntax)
-                await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                // Use session persistence so the login state remains during the session
+                await setPersistence(auth, browserSessionPersistence);
  if (initialAuthToken) {
-                    await auth.signInWithCustomToken(initialAuthToken);
+                    await signInWithCustomToken(auth, initialAuthToken);
  } else {
-                    await auth.signInAnonymously();
+                    await signInAnonymously(auth);
  }
 
                 userId = auth.currentUser?.uid ||
  crypto.randomUUID();
-                
-                // Set log level after init (V8)
-                firebase.firestore.setLogLevel('debug');
                 
                 loadCourses();
                 loadAttendanceRecords();
@@ -1117,7 +1115,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
             data.workPlace = finalWorkPlace;
  data.qualification = finalQualification; // Save the final qualification value
             
-            data.timestamp = firebase.firestore.FieldValue.serverTimestamp(); // V8 syntax
+            data.timestamp = serverTimestamp();
  data.userId = userId; 
             data.appId = appId;
 
@@ -1135,8 +1133,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
        
               qualification: finalQualification
                 };
-                // V8 addDoc equivalent
-                const docRef = await db.collection(ATTENDANCE_COLLECTION_PATH).add(recordData);
+ const docRef = await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
                 
                 console.log("Document successfully written with ID:", docRef.id);
 // Success message
