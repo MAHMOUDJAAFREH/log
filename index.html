@@ -352,14 +352,19 @@
         const COURSES_MASTER_COLLECTION = 'courses_master';
         const COURSE_SCHEDULE_COLLECTION = 'course_schedule'; 
         
-        // Check if we are in the Canvas environment by checking __app_id
-        const isCanvasEnvironment = typeof __app_id !== 'undefined' && __app_id !== 'default-app-id';
+        // --- START MODIFICATION (HOSTING FIX) ---
+        // Force the app to always use the Canvas data path, even when hosted externally.
+        // This solves the "Failed to load courses" error on external hosts.
+        const isCanvasEnvironment = true; 
+        // --- END MODIFICATION ---
         
         const getCollectionPath = (collectionName) => {
             if (isCanvasEnvironment) {
+                // When hosted externally, appId will be 'default-app-id'.
+                // This forces the app to look in the correct 'default-app-id' artifact path.
                 return `/artifacts/${appId}/public/data/${collectionName}`;
             }
-            // Use simple root collection name if not in Canvas
+            // This part is no longer used, but kept as a fallback.
             return collectionName;
         };
         
