@@ -139,6 +139,9 @@
                         <option value="مكتب الجودة ومراقبة النوعية">مكتب الجودة ومراقبة النوعية</option>
                         <option value="مكتب السيطرة على العدوى">مكتب السيطرة على العدوى</option>
                         <option value="مكتب السلامة العامة والبيئة">مكتب السلامة العامة والبيئة</option>
+                        <!-- START: ADDED NEW OPTION -->
+                        <option value="مكتب التعليم والتدريب والتطوير">مكتب التعليم والتدريب والتطوير</option>
+                        <!-- END: ADDED NEW OPTION -->
                         <option value="دائرة الموارد البشرية">دائرة الموارد البشرية</option>
                         <option value="مكتب العلاقات العامة">مكتب العلاقات العامة</option>
                         <option value="مكتب المعلومات والحاسوب">مكتب المعلومات والحاسوب</option>
@@ -1615,7 +1618,7 @@
             data.workPlace = finalWorkPlace;
             data.qualification = finalQualification; 
             
-            data.timestamp = serverTimestamp(); 
+            data.timestamp = serverTimestamp(); // This will be the "created" timestamp
             data.userId = userId; 
             data.appId = appId;
             
@@ -1660,7 +1663,7 @@
                     showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
                     
                     // Send to Google Sheets ONLY on new registration
-                    sendSingleRecordToSheet(recordData, new Date());
+                    sendSingleRecordToSheet(recordData, new Date()); // Use client time for sheet log
 
                     form.reset();
                     courseNameSelect.value = ""; 
