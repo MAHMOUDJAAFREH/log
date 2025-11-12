@@ -429,6 +429,7 @@
         };
         
         /* Function to show custom confirmation modal */
+        /* --- MODIFICATION: Add "تأكيد التسجيل المكرر" to title check --- */
         const showConfirm = (body, onConfirm, title = "تأكيد") => {
             const confirmBox = document.getElementById('confirmBox');
             const confirmTitleEl = document.getElementById('confirmTitle');
@@ -443,7 +444,7 @@
             confirmTitleEl.classList.remove('text-red-600', 'text-blue-600');
             confirmYesButton.classList.remove('bg-red-600', 'bg-blue-600', 'hover:bg-red-700', 'hover:bg-blue-700');
 
-            if (title === "تأكيد الحذف" || title === "تأكيد الخروج") {
+            if (title === "تأكيد الحذف" || title === "تأكيد الخروج" || title === "تأكيد التسجيل المكرر") {
                 confirmTitleEl.classList.add('text-red-600');
                 confirmYesButton.textContent = "نعم";
                 confirmYesButton.classList.add('bg-red-600', 'hover:bg-red-700');
@@ -856,6 +857,7 @@
                 const existingSnapshot = await getDocs(existingCourseQuery);
                 if (!existingSnapshot.empty) { 
                     showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false); 
+                    /* --- MODIFICATION: Must return here --- */
                     return; 
                 }
                 await addDoc(collection(db, COURSES_MASTER_PATH), { name: courseName, createdAt: serverTimestamp() });
@@ -883,6 +885,7 @@
                 const existingSnapshot = await getDocs(existingScheduleQuery);
                 if (!existingSnapshot.empty) { 
                     showMessage("مجدولة مسبقاً", `هذه الدورة ("${courseName}") مجدولة بالفعل في هذا التاريخ والوقت.`, false); 
+                    /* --- MODIFICATION: Must return here --- */
                     return; 
                 }
                 await addDoc(collection(db, SCHEDULE_PATH), { courseMasterId: courseId, courseName: courseName, courseDate: localDate, createdAt: serverTimestamp() });
@@ -1134,6 +1137,7 @@
             }
         };
 
+        /* --- MODIFICATION: handleSubmit updated with localStorage duplicate check --- */
         const handleSubmit = async (event) => {
             event.preventDefault();
             if (!isReady) { showMessage("النظام غير جاهز", "الرجاء الانتظار حتى يتم تحميل النظام.", false); return; }
@@ -1174,58 +1178,100 @@
             
             try {
                 const firestoreCourseTimestamp = Timestamp.fromDate(selectedCourseDate);
-                let snapshot;
-
-                /* --- (MODIFICATION: Only check for duplicates if admin) --- */
+                
                 if (isAdmin) {
+                    /* --- ADMIN LOGIC (Checks Firestore) --- */
                     const duplicateCheckQuery = firestoreQuery(collection(db, ATTENDANCE_COLLECTION_PATH), where('employeeIdEn', '==', employeeId), where('courseDate', '==', firestoreCourseTimestamp));
-                    snapshot = await getDocs(duplicateCheckQuery);
-                } else {
-                    /* Anonymous user: Create an empty snapshot object to skip the check */
-                    snapshot = { empty: true, docs: [] };
-                }
+                    const snapshot = await getDocs(duplicateCheckQuery);
 
-                if (snapshot.empty) {
-                    /* (New registration for admin, or all registrations for anonymous) */
-                    const docRef = await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
-                    console.log("New registration. Document written with ID:", docRef.id);
-                    showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
-                    sendSingleRecordToSheet(recordData, new Date());
+                    if (snapshot.empty) {
+                        /* Admin new registration */
+                        await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
+                        showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
+                        sendSingleRecordToSheet(recordData, new Date());
+                        saveProfileToLocalStorage(recordData);
+                        form.reset(); courseNameSelect.value = ""; 
+                        workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
+                        /* Re-enable button */
+                        submitButton.disabled = false; buttonText.textContent = "تسجيل الحضور"; loadingSpinner.classList.add('hidden');
+                    } else {
+                        /* Admin update logic */
+                        const existingDocId = snapshot.docs[0].id;
+                        showConfirm("لقد قمت بالتسجيل في هذه الدورة مسبقاً. هل ترغب بتحديث بياناتك بالمعلومات الجديدة التي أدخلتها الآن؟", async () => {
+                                try {
+                                    const docRef = doc(db, ATTENDANCE_COLLECTION_PATH, existingDocId);
+                                    const dataToUpdate = { ...recordData, timestamp: snapshot.docs[0].data().timestamp, updatedAt: serverTimestamp() }; 
+                                    await updateDoc(docRef, dataToUpdate); 
+                                    console.log("Existing registration updated. Document ID:", existingDocId);
+                                    showMessage("تم تحديث البيانات", "لقد قمت بالتسجيل مسبقاً. تم تحديث بياناتك بنجاح.", true);
+                                    sendSingleRecordToSheet(recordData, snapshot.docs[0].data().timestamp.toDate());
+                                    saveProfileToLocalStorage(dataToUpdate);
+                                    form.reset(); courseNameSelect.value = ""; 
+                                    workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
+                                } catch (updateError) { console.error("Error updating document: ", updateError); showMessage("خطأ في التحديث", `حدث خطأ أثناء تحديث البيانات: ${updateError.message}.`, false);
+                                } finally { 
+                                    /* Re-enable button */
+                                    submitButton.disabled = false; buttonText.textContent = "تسجيل الحضور"; loadingSpinner.classList.add('hidden');
+                                }
+                            }, "تأكيد التحديث");
+                    }
                     
-                    /* --- MODIFICATION: Save profile to localStorage on success --- */
-                    saveProfileToLocalStorage(recordData);
-
-                    form.reset(); courseNameSelect.value = ""; 
-                    workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
                 } else {
-                    /* (Only admin can reach this part) */
-                    const existingDocId = snapshot.docs[0].id;
-                    showConfirm("لقد قمت بالتسجيل في هذه الدورة مسبقاً. هل ترغب بتحديث بياناتك بالمعلومات الجديدة التي أدخلتها الآن؟", async () => {
-                            try {
-                                const docRef = doc(db, ATTENDANCE_COLLECTION_PATH, existingDocId);
-                                const dataToUpdate = { ...recordData, timestamp: snapshot.docs[0].data().timestamp, updatedAt: serverTimestamp() }; 
-                                await updateDoc(docRef, dataToUpdate); 
-                                console.log("Existing registration updated. Document ID:", existingDocId);
-                                showMessage("تم تحديث البيانات", "لقد قمت بالتسجيل مسبقاً. تم تحديث بياناتك بنجاح.", true);
-                                sendSingleRecordToSheet(recordData, snapshot.docs[0].data().timestamp.toDate());
-                                
-                                /* --- MODIFICATION: Save updated profile to localStorage --- */
-                                saveProfileToLocalStorage(dataToUpdate);
-
-                                form.reset(); courseNameSelect.value = ""; 
-                                workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
-                            } catch (updateError) { console.error("Error updating document: ", updateError); showMessage("خطأ في التحديث", `حدث خطأ أثناء تحديث البيانات: ${updateError.message}.`, false);
-                            } finally { /* This part is now handled in the 'finally' below */ }
-                        }, "تأكيد التحديث");
+                    /* --- ANONYMOUS LOGIC (Checks LocalStorage) --- */
+                    const registrationKey = `reg_${employeeId}_${recordData.courseName}_${recordData.courseDate.getTime()}`;
+                    
+                    if (localStorage.getItem(registrationKey)) {
+                        /* Duplicate found in localStorage */
+                        showConfirm(
+                            "لقد قمت بالتسجيل في هذه الدورة سابقاً من هذا المتصفح. هل ترغب بالاستمرار؟ (سيتم إرسال سجل جديد لتحديث بياناتك).",
+                            async () => {
+                                /* User clicked "Yes", proceed with submission */
+                                try {
+                                    await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
+                                    showMessage("تم تسجيل الحضور بنجاح", "تم إرسال بياناتك المحدثة.", true);
+                                    sendSingleRecordToSheet(recordData, new Date());
+                                    saveProfileToLocalStorage(recordData);
+                                    localStorage.setItem(registrationKey, 'true'); /* Re-set the key */
+                                    form.reset(); 
+                                    courseNameSelect.value = ""; 
+                                    workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; 
+                                    qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
+                                } catch (error) {
+                                    console.error("Error adding document after confirm:", error); 
+                                    showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
+                                } finally {
+                                    /* Re-enable button */
+                                    submitButton.disabled = false; buttonText.textContent = "تسجيل الحضور"; loadingSpinner.classList.add('hidden');
+                                }
+                            },
+                            "تأكيد التسجيل المكرر"
+                        );
+                        /* Note: If user clicks "No", the default `handleConfirmNo` will re-enable the button, which is correct here. */
+                        
+                    } else {
+                        /* No duplicate in localStorage, proceed immediately */
+                        await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
+                        showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
+                        sendSingleRecordToSheet(recordData, new Date());
+                        saveProfileToLocalStorage(recordData);
+                        localStorage.setItem(registrationKey, 'true'); /* Save receipt */
+                        form.reset(); 
+                        courseNameSelect.value = ""; 
+                        workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; 
+                        qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
+                        
+                        /* Re-enable button */
+                        submitButton.disabled = false; buttonText.textContent = "تسجيل الحضور"; loadingSpinner.classList.add('hidden');
+                    }
                 }
+                
             } catch (error) { 
-                console.error("Error checking/adding document: ", error); showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
-            } finally {
-                /* This will run after 'try' or 'catch', ensuring button is re-enabled */
-                if(submitButton) submitButton.disabled = false; 
-                if(buttonText) buttonText.textContent = "تسجيل الحضور"; 
-                if(loadingSpinner) loadingSpinner.classList.add('hidden');
-            }
+                console.error("Error checking/adding document: ", error); 
+                showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
+                /* Re-enable button */
+                submitButton.disabled = false; buttonText.textContent = "تسجيل الحضور"; loadingSpinner.classList.add('hidden');
+            } 
+            /* We removed the 'finally' block to allow async confirmation */
         };
 
         /* دوال التحكم بنافذة المشرف */
