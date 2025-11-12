@@ -30,7 +30,8 @@
                 <h1 class="text-3xl font-extrabold text-blue-700 mb-1 leading-tight" id="mainTitle">نموذج تسجيل الحضور</h1>
                 <h2 class="text-lg font-medium text-gray-600">شعبة التعليم والتدريب والتطوير الفني والإداري</h2>
             </div>
-            <button id="viewToggle" onclick="window.switchView('admin')"
+            <!-- زر التبديل: سيفتح نافذة الدخول أو يسجل الخروج حسب الحالة -->
+            <button id="viewToggle" onclick="window.handleAdminClick()"
                     class="bg-blue-500 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-150 shadow-md">
                 لوحة المشرف
             </button>
@@ -40,8 +41,7 @@
             <span class="font-semibold text-gray-700">معرف المستخدم (للتتبع):</span> <span id="currentUserId">N/A</span>
         </div>
 
-      
-        <!-- Modal Box for Messages -->
+        <!-- نافذة الرسائل المنبثقة (Alert) -->
         <div id="messageBox" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-40 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
             <div id="messageContent" class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center transform transition-transform duration-300 scale-95">
                 <h3 id="messageTitle" class="text-xl font-bold mb-3"></h3>
@@ -53,7 +53,7 @@
             </div>
         </div>
         
-        <!-- Modal Box for Confirmation -->
+        <!-- نافذة التأكيد (Confirm) -->
         <div id="confirmBox" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-40 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center transform transition-transform duration-300 scale-95" dir="rtl">
                 <h3 id="confirmTitle" class="text-xl font-bold mb-3 text-red-600">تأكيد</h3>
@@ -71,7 +71,39 @@
         </div>
 
         <!-- ======================= -->
-        <!-- USER VIEW (ATTENDANCE)  -->
+        <!-- نافذة تسجيل دخول المشرف (الجديدة) -->
+        <!-- ======================= -->
+        <div id="adminLoginBox" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-40 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm" dir="rtl">
+                <h3 class="text-xl font-bold mb-4 text-blue-700">تسجيل دخول المشرف</h3>
+                <form id="adminLoginForm" class="space-y-4">
+                    <div>
+                        <label for="adminEmail" class="block text-sm font-semibold text-gray-700 mb-2">البريد الإلكتروني</label>
+                        <input type="email" id="adminEmail" required
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-left" dir="ltr" placeholder="admin@example.com">
+                    </div>
+                    <div>
+                        <label for="adminPassword" class="block text-sm font-semibold text-gray-700 mb-2">كلمة السر</label>
+                        <input type="password" id="adminPassword" required
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-left" dir="ltr" placeholder="••••••••">
+                    </div>
+                    <p id="adminLoginError" class="text-xs text-red-600 hidden">البريد الإلكتروني أو كلمة السر غير صحيحة.</p>
+                    <div class="flex justify-between items-center pt-2">
+                        <button type="button" onclick="window.closeAdminLogin()"
+                                class="bg-gray-400 text-white py-2 px-4 rounded-lg hover:bg-gray-500 transition duration-150">
+                            إلغاء
+                        </button>
+                        <button type="submit" id="adminLoginButton"
+                                class="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-150">
+                            دخول
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- واجهة المستخدم (الحضور)  -->
         <!-- ======================= -->
         <div id="userView">
 
@@ -139,9 +171,7 @@
                         <option value="مكتب الجودة ومراقبة النوعية">مكتب الجودة ومراقبة النوعية</option>
                         <option value="مكتب السيطرة على العدوى">مكتب السيطرة على العدوى</option>
                         <option value="مكتب السلامة العامة والبيئة">مكتب السلامة العامة والبيئة</option>
-                        <!-- START: ADDED NEW OPTION -->
                         <option value="مكتب التعليم والتدريب والتطوير">مكتب التعليم والتدريب والتطوير</option>
-                        <!-- END: ADDED NEW OPTION -->
                         <option value="دائرة الموارد البشرية">دائرة الموارد البشرية</option>
                         <option value="مكتب العلاقات العامة">مكتب العلاقات العامة</option>
                         <option value="مكتب المعلومات والحاسوب">مكتب المعلومات والحاسوب</option>
@@ -213,7 +243,7 @@
         </div>
 
         <!-- ======================= -->
-        <!-- ADMIN VIEW (MANAGEMENT) -->
+        <!-- واجهة المشرف (الإدارة) -->
         <!-- ======================= -->
         <div id="adminView" class="hidden max-w-full md:max-w-4xl" style="direction: ltr;">
             <button onclick="window.switchView('user')"
@@ -223,7 +253,7 @@
                 العودة لنموذج الحضور
             </button>
 
-            <!-- Box 1 - Master Course List -->
+            <!-- الصندوق 1 - قائمة الدورات الرئيسية -->
             <div class="bg-green-50 p-6 rounded-xl mb-8 border-l-4 border-green-400">
                 <h3 class="text-xl font-bold text-green-700 mb-4" dir="rtl">1. إدارة أسماء الدورات (الرئيسية)</h3>
                 <form id="masterCourseForm" class="flex flex-col md:flex-row gap-3" dir="rtl">
@@ -243,7 +273,7 @@
                 </div>
             </div>
 
-            <!-- Box 2 - Course Scheduling -->
+            <!-- الصندوق 2 - جدولة الدورات -->
             <div class="bg-blue-50 p-6 rounded-xl mb-8 border-l-4 border-blue-400">
                 <h3 class="text-xl font-bold text-blue-700 mb-4" dir="rtl">2. جدولة الدورات</h3>
                 <form id="scheduleCourseForm" class="flex flex-col md:flex-row gap-3" dir="rtl">
@@ -277,7 +307,7 @@
                 </div>
             </div>
 
-            <!-- Box 3 - Attendance Records -->
+            <!-- الصندوق 3 - سجلات الحضور -->
             <div class="mt-8">
                 <div class="flex justify-between items-center mb-4" dir="rtl">
                     <h3 class="text-xl font-bold text-gray-700">سجلات الحضور (<span id="recordCount">0</span> تسجيل)</h3>
@@ -311,9 +341,9 @@
     </div>
 
     <script type="module">
-        // ----------------------------------------------------------------
-        // NOTE: Firebase Config and App ID are now hardcoded based on user's request.
-        // ----------------------------------------------------------------
+        /* ----------------------------------------------------------------
+         * NOTE: Firebase Config and App ID are now hardcoded based on user's request.
+         * ---------------------------------------------------------------- */
         const firebaseConfig = {
             apiKey: "AIzaSyBRbLWcAFNAGHAIi5DRwCGDp4f7o4H4ZP8",
             authDomain: "attendance-training-log.firebaseapp.com",
@@ -322,52 +352,47 @@
             messagingSenderId: "281858319933",
             appId: "1:281858319933:web:dd2b5b6af852b65ac2ac54"
         };
-        // ***************************************************************
-        // ** التعديل الهام: تم وضع رابط النشر لسكريبت Google Apps Script هنا **
-        // (هذا هو الرابط الجديد الذي طلبته)
-        // ***************************************************************
+        /* ***************************************************************
+         * ** رابط Google Apps Script للنشر **
+         * *************************************************************** */
         const GOOGLE_SHEETS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCPMsvJLLPt2J8_j8LYFCq8xUmL9AP2gUhoRIkv7XGBeh69qMz5mCENkNcpYfh3ljhtQ/exec';
-        // ***************************************************************
+        /* *************************************************************** */
 
-        // Global variables provided by the environment (using project ID as app ID for simplicity here)
+        /* Global variables provided by the environment */
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Firebase Imports (using mandated version 11.6.1)
+        /* Firebase Imports */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserSessionPersistence, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query, serverTimestamp, getDocs, where, doc, deleteDoc, updateDoc, getDoc, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { query as firestoreQuery } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set log level for debugging
-        setLogLevel('Debug');
-
-        // Initialize Firebase variables
+        /* --- MODIFICATION: Define all functions in the global module scope --- */
+        
+        /* Initialize Firebase variables */
         let app, db, auth, userId = 'anonymous';
         let isReady = false; 
-
-        // Global variable to hold records for export
+        let isAdmin = false;
         let currentRecords = [];
         
-        // مسارات Firestore الآمنة
+        /* مسارات Firestore الآمنة */
         const ATTENDANCE_COLLECTION = 'attendance_records'; 
         const COURSES_MASTER_COLLECTION = 'courses_master';
         const COURSE_SCHEDULE_COLLECTION = 'course_schedule'; 
-        
-        // --- START MODIFICATION (HOSTING FIX) ---
-        // Force the app to always use the Canvas data path, even when hosted externally.
-        // This solves the "Failed to load courses" error on external hosts.
         const isCanvasEnvironment = true; 
-        // --- END MODIFICATION ---
         
+        /* UI element variables (will be assigned in DOMContentLoaded) */
+        let employeeIdInput, nameArInput, nameEnInput, nationalIdInput, workPlaceSelect, workPlaceOtherInput, jobTitleInput, phoneEnInput, qualificationSelect, qualificationOtherInput, userView, adminView, mainTitle, viewToggle, form, masterCourseForm, masterCourseListUl, scheduleCourseForm, scheduleCourseSelect, courseScheduleListUl, courseNameSelect, recordsTableBody, recordCountSpan, submitButton, buttonText, loadingSpinner, exportButton, adminLoginForm;
+        
+        /* Global variable to store confirmation callback */
+        let confirmCallback = null;
+
         const getCollectionPath = (collectionName) => {
             if (isCanvasEnvironment) {
-                // When hosted externally, appId will be 'default-app-id'.
-                // This forces the app to look in the correct 'default-app-id' artifact path.
                 return `/artifacts/${appId}/public/data/${collectionName}`;
             }
-            // This part is no longer used, but kept as a fallback.
             return collectionName;
         };
         
@@ -375,62 +400,19 @@
         const COURSES_MASTER_PATH = getCollectionPath(COURSES_MASTER_COLLECTION);
         const SCHEDULE_PATH = getCollectionPath(COURSE_SCHEDULE_COLLECTION);
 
-        // UI elements
-        const employeeIdInput = document.getElementById('employeeIdEn');
-        const nameArInput = document.getElementById('nameAr');
-        const nameEnInput = document.getElementById('nameEn');
-        const nationalIdInput = document.getElementById('nationalIdEn');
-        const workPlaceSelect = document.getElementById('workPlace'); 
-        const workPlaceOtherInput = document.getElementById('workPlaceOther');
-        const jobTitleInput = document.getElementById('jobTitle');
-        const phoneEnInput = document.getElementById('phoneEn');
-        const qualificationSelect = document.getElementById('qualification'); 
-        const qualificationOtherInput = document.getElementById('qualificationOther'); 
-        
-        const userView = document.getElementById('userView');
-        const adminView = document.getElementById('adminView');
-        const mainTitle = document.getElementById('mainTitle');
-        const viewToggle = document.getElementById('viewToggle');
-        const form = document.getElementById('attendanceForm');
-        
-        const masterCourseForm = document.getElementById('masterCourseForm');
-        const masterCourseListUl = document.getElementById('courseMasterList');
-        const scheduleCourseForm = document.getElementById('scheduleCourseForm');
-        const scheduleCourseSelect = document.getElementById('scheduleCourseSelect');
-        const courseScheduleListUl = document.getElementById('courseScheduleList'); 
-
-        const courseNameSelect = document.getElementById('courseName');
-        const recordsTableBody = document.getElementById('attendanceRecordsTable');
-        const recordCountSpan = document.getElementById('recordCount');
-        const submitButton = document.getElementById('submitButton');
-        const buttonText = document.getElementById('buttonText');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const exportButton = document.getElementById('exportButton');
-
-        // Global variable to store confirmation callback
-        let confirmCallback = null;
-
-        // Event listener for the "Yes" button in the confirm modal
-        document.getElementById('confirmYes')?.addEventListener('click', () => {
-            document.getElementById('confirmBox').classList.add('hidden', 'opacity-0');
-            document.getElementById('confirmBox').classList.remove('opacity-100');
-            if (confirmCallback) {
-                confirmCallback();
-                confirmCallback = null;
-            }
-        });
-
-        // Function to show custom modal messages
+        /* Function to show custom modal messages */
         const showMessage = (title, body, isSuccess = false) => {
             const messageBox = document.getElementById('messageBox');
             const messageTitle = document.getElementById('messageTitle');
             const messageBody = document.getElementById('messageBody');
+            if (!messageBox || !messageTitle || !messageBody) return; 
+            
             const button = messageBox.querySelector('button');
+            if (!button) return; 
 
             messageTitle.textContent = title;
             messageBody.textContent = body;
             
-            // Set style based on success/error
             messageTitle.classList.remove('text-red-600', 'text-green-600');
             button.classList.remove('bg-blue-600', 'bg-green-600');
 
@@ -442,137 +424,111 @@
                 button.classList.add('bg-blue-600');
             }
 
-            // Show the modal
             messageBox.classList.remove('hidden');
             setTimeout(() => messageBox.classList.add('opacity-100'), 10);
         };
         
-        // Function to show custom confirmation modal
+        /* Function to show custom confirmation modal */
         const showConfirm = (body, onConfirm, title = "تأكيد") => {
             const confirmBox = document.getElementById('confirmBox');
-            document.getElementById('confirmTitle').textContent = title;
-            document.getElementById('confirmBody').textContent = body;
-            
-            // Set title color based on type (default red for "تأكيد")
             const confirmTitleEl = document.getElementById('confirmTitle');
-            confirmTitleEl.classList.remove('text-red-600', 'text-blue-600');
+            const confirmBodyEl = document.getElementById('confirmBody');
             const confirmYesButton = document.getElementById('confirmYes');
+            
+            if (!confirmBox || !confirmTitleEl || !confirmBodyEl || !confirmYesButton) return; 
+
+            confirmTitleEl.textContent = title;
+            confirmBodyEl.textContent = body;
+            
+            confirmTitleEl.classList.remove('text-red-600', 'text-blue-600');
             confirmYesButton.classList.remove('bg-red-600', 'bg-blue-600', 'hover:bg-red-700', 'hover:bg-blue-700');
 
-            if (title === "تأكيد الحذف") {
-                 confirmTitleEl.classList.add('text-red-600');
-                 confirmYesButton.textContent = "نعم، احذف";
-                 confirmYesButton.classList.add('bg-red-600', 'hover:bg-red-700');
-            } else { // For "تأكيد التحديث" or any other
-                 confirmTitleEl.classList.add('text-blue-600');
-                 confirmYesButton.textContent = "نعم، تحديث";
-                 confirmYesButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            if (title === "تأكيد الحذف" || title === "تأكيد الخروج") {
+                confirmTitleEl.classList.add('text-red-600');
+                confirmYesButton.textContent = "نعم";
+                confirmYesButton.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else { 
+                confirmTitleEl.classList.add('text-blue-600');
+                confirmYesButton.textContent = "نعم، تحديث";
+                confirmYesButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
             }
 
             confirmCallback = onConfirm;
-
             confirmBox.classList.remove('hidden');
             setTimeout(() => confirmBox.classList.add('opacity-100'), 10);
         };
 
-        // Handle the "No" button on the confirmation modal
+        /* Handle the "No" button on the confirmation modal */
         const handleConfirmNo = () => {
-            document.getElementById('confirmBox').classList.add('hidden', 'opacity-0');
-            document.getElementById('confirmBox').classList.remove('opacity-100');
-            confirmCallback = null; // Clear the yes callback
+            const confirmBox = document.getElementById('confirmBox');
+            if(confirmBox) {
+                confirmBox.classList.add('hidden', 'opacity-0');
+                confirmBox.classList.remove('opacity-100');
+            }
+            confirmCallback = null; 
 
-            // Re-enable submit button if it was disabled during submission
-            if (!submitButton.disabled && loadingSpinner.classList.contains('hidden')) return; 
-            submitButton.disabled = false;
-            buttonText.textContent = "تسجيل الحضور";
-            loadingSpinner.classList.add('hidden');
+            if (submitButton && !submitButton.disabled && loadingSpinner && loadingSpinner.classList.contains('hidden')) return; 
+            if (submitButton) submitButton.disabled = false;
+            if (buttonText) buttonText.textContent = "تسجيل الحضور";
+            if (loadingSpinner) loadingSpinner.classList.add('hidden');
         };
-        window.handleConfirmNo = handleConfirmNo;
 
-        // Action buttons for Master Course List
+        /* Action buttons for Master Course List */
         const getMasterCourseActionButtons = (id, name) => {
             const escapedName = name.replace(/'/g, "\\'");
             return `
-                <button onclick="window.handleEditMasterCourse('${id}', '${escapedName}')" 
-                        class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition duration-150" title="تعديل الاسم">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                </button>
-                <button onclick="window.handleDeleteMasterCourse('${id}', '${escapedName}')" 
-                        class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف الدورة الرئيسية">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <button onclick="window.handleEditMasterCourse('${id}', '${escapedName}')" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition duration-150" title="تعديل الاسم"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                <button onclick="window.handleDeleteMasterCourse('${id}', '${escapedName}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف الدورة الرئيسية"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
             `;
         };
-        window.getMasterCourseActionButtons = getMasterCourseActionButtons;
 
-        // Action buttons for Scheduled Course List
+        /* Action buttons for Scheduled Course List */
         const getScheduledCourseActionButtons = (id, name, yyyyMmDd, hhMm) => {
             const escapedName = name.replace(/'/g, "\\'");
             return `
-                <button onclick="window.handleEditScheduledCourse('${id}', '${escapedName}', '${yyyyMmDd}', '${hhMm}')" 
-                        class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition duration-150" title="تعديل التاريخ والوقت">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                </button>
-                <button onclick="window.handleDeleteScheduledCourse('${id}', '${escapedName}')" 
-                        class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء جدولة هذه الدورة">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <button onclick="window.handleEditScheduledCourse('${id}', '${escapedName}', '${yyyyMmDd}', '${hhMm}')" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition duration-150" title="تعديل التاريخ والوقت"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                <button onclick="window.handleDeleteScheduledCourse('${id}', '${escapedName}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء جدولة هذه الدورة"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
             `;
         };
-        window.getScheduledCourseActionButtons = getScheduledCourseActionButtons;
-
 
         /**
          * Switches the application view between 'user' and 'admin'.
          */
         const switchView = (view) => {
-            if (view === 'admin') {
+            if (view === 'admin' && adminView && userView) {
                 userView.classList.add('hidden');
                 adminView.classList.remove('hidden');
-                mainTitle.textContent = 'لوحة تحكم المشرف';
-                viewToggle.textContent = 'نموذج الحضور';
-                viewToggle.onclick = () => window.switchView('user');
-                document.getElementById('userIdDisplay').classList.remove('hidden');
-                document.getElementById('currentUserId').textContent = userId;
-            } else { // user view
+                if(mainTitle) mainTitle.textContent = 'لوحة تحكم المشرف';
+                const userIdDisplay = document.getElementById('userIdDisplay');
+                const currentUserId = document.getElementById('currentUserId');
+                if(userIdDisplay) userIdDisplay.classList.remove('hidden');
+                if(currentUserId) currentUserId.textContent = userId;
+            } else if (adminView && userView) { /* user view */
                 adminView.classList.add('hidden');
                 userView.classList.remove('hidden');
-                mainTitle.textContent = 'نموذج تسجيل الحضور';
-                viewToggle.textContent = 'لوحة المشرف';
-                viewToggle.onclick = () => window.switchView('admin');
-                document.getElementById('userIdDisplay').classList.add('hidden');
+                if(mainTitle) mainTitle.textContent = 'نموذج تسجيل الحضور';
+                const userIdDisplay = document.getElementById('userIdDisplay');
+                if(userIdDisplay) userIdDisplay.classList.add('hidden');
             }
         };
-        window.switchView = switchView;
 
         /**
          * Loads courses from Firestore and populates the select dropdown and Admin list.
-         * This function is for the USER VIEW ONLY.
-         * It loads SCHEDULED courses for TODAY.
          */
         const loadCourses = () => {
             if (!db) return;
- 
-            // Get today's date string in YYYY-MM-DD format
             const today = new Date();
-            // Get start of today (local time)
             const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
-            // Get end of today (local time)
             const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+            const coursesForToday = [];
 
-            const coursesForToday = []; // For user dropdown
-
-            // Query the SCHEDULE collection
             const q = query(collection(db, SCHEDULE_PATH), 
                 where('courseDate', '>=', startOfDay), 
                 where('courseDate', '<=', endOfDay)
             );
             
-            // onSnapshot for real-time updates
             onSnapshot(q, (snapshot) => {
-
-                coursesForToday.length = 0; // Clear array on update
-
+                coursesForToday.length = 0;
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     if (data.courseDate && data.courseDate.toDate) {
@@ -592,10 +548,9 @@
                     }
                 });
 
-                // 1. Populate User Dropdown
-                courseNameSelect.innerHTML = ''; // Clear all options
+                if (!courseNameSelect) return;
                 
-                // Sort by date/time first
+                courseNameSelect.innerHTML = '';
                 coursesForToday.sort((a, b) => a.dateObj - b.dateObj);
                 
                 if (coursesForToday.length === 0) {
@@ -606,14 +561,12 @@
                     option.selected = true;
                     courseNameSelect.appendChild(option);
                     
-                    submitButton.disabled = true;
-                    if (isReady) { 
+                    if (submitButton) submitButton.disabled = true;
+                    if (isReady && buttonText) { 
                         buttonText.textContent = "لا يوجد دورات اليوم";
                     }
                     courseNameSelect.disabled = true; 
-
                 } else {
-                    // Add the default placeholder
                     const placeholderOption = document.createElement('option');
                     placeholderOption.value = "";
                     placeholderOption.textContent = "-- الرجاء اختيار اسم الدورة --";
@@ -621,34 +574,31 @@
                     placeholderOption.selected = true;
                     courseNameSelect.appendChild(placeholderOption);
 
-                    // Add today's courses
                     coursesForToday.forEach(course => {
                         const option = document.createElement('option');
-                        option.value = course.name; // Value is the base name
-                        option.textContent = course.nameWithTime; // Text includes time
+                        option.value = course.name;
+                        option.textContent = course.nameWithTime;
                         option.setAttribute('data-start-time', course.dateObj.getTime());
                         option.setAttribute('data-exact-timestamp', course.exactTimestamp); 
                         courseNameSelect.appendChild(option);
                     });
                     
                     if (isReady) {
-                        submitButton.disabled = false;
-                        buttonText.textContent = "تسجيل الحضور";
+                        if (submitButton) submitButton.disabled = false;
+                        if (buttonText) buttonText.textContent = "تسجيل الحضور";
                     }
                     courseNameSelect.disabled = false; 
                 }
-
                 console.log(`Loaded ${coursesForToday.length} courses for user dropdown.`);
             }, (error) => {
                 console.error("Error loading courses for user:", error);
                 showMessage("خطأ في الدورات", "فشل تحميل قائمة الدورات. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
             });
         };
-        window.loadCourses = loadCourses; 
 
-        // New function to load MASTER courses (Admin)
+        /* New function to load MASTER courses (Admin) */
         const loadMasterCourses = () => {
-            if (!db) return;
+            if (!db || !isAdmin) return; /* (حماية) */
             const q = query(collection(db, COURSES_MASTER_PATH));
 
             onSnapshot(q, (snapshot) => {
@@ -660,17 +610,12 @@
                     });
                 });
 
-                // Sort by name
                 allMasterCourses.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-
-                // 1. Populate Admin Master List (courseMasterListUl)
-                masterCourseListUl.innerHTML = '';
-                // 2. Populate Admin Scheduling Dropdown (scheduleCourseSelect)
-                scheduleCourseSelect.innerHTML = '<option value="" disabled selected>-- اختر دورة للجدولة --</option>';
+                if (masterCourseListUl) masterCourseListUl.innerHTML = '';
+                if (scheduleCourseSelect) scheduleCourseSelect.innerHTML = '<option value="" disabled selected>-- اختر دورة للجدولة --</option>';
 
                 if (allMasterCourses.length > 0) {
                     allMasterCourses.forEach(course => {
-                        // 1. Add to Admin List
                         const li = document.createElement('li');
                         li.id = `master-course-item-${course.id}`;
                         li.className = "flex items-center justify-between border-b last:border-b-0 py-2 group";
@@ -678,32 +623,29 @@
                         li.innerHTML = `
                             <span id="master-course-name-${course.id}" class="truncate text-base font-medium text-gray-800">${course.name}</span>
                             <div id="master-course-actions-${course.id}" class="flex space-x-2 space-x-reverse min-w-[50px] items-center justify-end">
-                                ${window.getMasterCourseActionButtons(course.id, course.name)}
+                                ${getMasterCourseActionButtons(course.id, course.name)}
                             </div>
                         `;
-                        masterCourseListUl.appendChild(li);
+                        if (masterCourseListUl) masterCourseListUl.appendChild(li);
 
-                        // 2. Add to Admin Dropdown
                         const option = document.createElement('option');
-                        option.value = course.id; // Value is the ID
-                        option.textContent = course.name; // Text is the Name
-                        scheduleCourseSelect.appendChild(option);
+                        option.value = course.id;
+                        option.textContent = course.name;
+                        if (scheduleCourseSelect) scheduleCourseSelect.appendChild(option);
                     });
                 } else {
-                    masterCourseListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات رئيسية مسجلة.</li>';
-                    scheduleCourseSelect.innerHTML = '<option value="" disabled selected>-- الرجاء إضافة دورات رئيسية أولاً --</option>';
+                    if (masterCourseListUl) masterCourseListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات رئيسية مسجلة.</li>';
+                    if (scheduleCourseSelect) scheduleCourseSelect.innerHTML = '<option value="" disabled selected>-- الرجاء إضافة دورات رئيسية أولاً --</option>';
                 }
-                console.log(`Loaded ${allMasterCourses.length} master courses.`);
             }, (error) => {
                 console.error("Error loading master courses:", error);
-                masterCourseListUl.innerHTML = '<li class="text-center py-2 text-red-500">خطأ في تحميل الدورات الرئيسية.</li>';
+                if (masterCourseListUl) masterCourseListUl.innerHTML = '<li class="text-center py-2 text-red-500">خطأ في تحميل الدورات الرئيسية.</li>';
             });
         };
-        window.loadMasterCourses = loadMasterCourses;
 
-        // New function to load SCHEDULED courses (Admin)
+        /* New function to load SCHEDULED courses (Admin) */
         const loadScheduledCourses = () => {
-            if (!db) return;
+            if (!db || !isAdmin) return; /* (حماية) */
             const q = query(collection(db, SCHEDULE_PATH));
 
             onSnapshot(q, (snapshot) => {
@@ -717,15 +659,13 @@
                     });
                 });
 
-                // Sort by date, descending (newest first)
                 allScheduledCourses.sort((a, b) => {
                     const timeA = b.date?.toDate ? b.date.toDate().getTime() : 0;
                     const timeB = a.date?.toDate ? a.date.toDate().getTime() : 0;
                     return timeA - timeB;
                 });
 
-                // Populate Admin Schedule List (courseScheduleListUl)
-                courseScheduleListUl.innerHTML = '';
+                if (courseScheduleListUl) courseScheduleListUl.innerHTML = '';
                 if (allScheduledCourses.length > 0) {
                     allScheduledCourses.forEach(course => {
                         const li = document.createElement('li');
@@ -734,13 +674,11 @@
                         li.dir = "rtl";
                         
                         const yyyyMmDd = course.date ? course.date.toDate().toISOString().split('T')[0] : '';
-                        
                         const courseDateTimeStr = course.date ? 
                             course.date.toDate().toLocaleString('ar-EG-u-nu-latn', { 
                                 year: 'numeric', month: 'short', day: 'numeric', 
                                 hour: '2-digit', minute: '2-digit', hour12: true 
-                            }) : 
-                            '<i>لا يوجد تاريخ محدد</i>';
+                            }) : '<i>لا يوجد تاريخ محدد</i>';
                         
                         const hhMm = course.date ? course.date.toDate().toTimeString().split(':').slice(0, 2).join(':') : '12:00';
 
@@ -750,462 +688,225 @@
                                 <span class="text-xs text-gray-500">${courseDateTimeStr}</span>
                             </div>
                             <div id="schedule-actions-${course.id}" class="flex space-x-2 space-x-reverse min-w-[50px] items-center justify-end">
-                                ${window.getScheduledCourseActionButtons(course.id, course.name, yyyyMmDd, hhMm)}
+                                ${getScheduledCourseActionButtons(course.id, course.name, yyyyMmDd, hhMm)}
                             </div>
                         `;
-                        courseScheduleListUl.appendChild(li);
+                        if (courseScheduleListUl) courseScheduleListUl.appendChild(li);
                     });
                 } else {
-                    courseScheduleListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات مجدولة بعد.</li>';
+                    if (courseScheduleListUl) courseScheduleListUl.innerHTML = '<li class="text-center py-2 text-gray-400">لا توجد دورات مجدولة بعد.</li>';
                 }
-                console.log(`Loaded ${allScheduledCourses.length} scheduled courses.`);
             }, (error) => {
                 console.error("Error loading scheduled courses:", error);
-                courseScheduleListUl.innerHTML = '<li class="text-center py-2 text-red-500">خطأ في تحميل جدول الدورات.</li>';
+                if (courseScheduleListUl) courseScheduleListUl.innerHTML = '<li class="text-center py-2 text-red-500">خطأ في تحميل جدول الدورات.</li>';
             });
         };
-        window.loadScheduledCourses = loadScheduledCourses; 
 
-
-        // Delete a MASTER course
+        /* Delete/Edit functions (Standard) */
         const handleDeleteMasterCourse = async (courseId, courseName) => {
-            showConfirm(
-                `هل أنت متأكد من حذف الدورة الرئيسية: "${courseName}"؟ سيؤدي هذا إلى إزالتها من قائمة الجدولة، لكنه لن يحذف الدورات التي تمت جدولتها سابقاً أو سجلات الحضور.`,
-                async () => {
-                    const courseItem = document.getElementById(`master-course-item-${courseId}`);
-                    if (courseItem) {
-                        courseItem.style.opacity = '0.5';
-                        courseItem.style.pointerEvents = 'none';
-                    }
-                    try {
-                        await deleteDoc(doc(db, COURSES_MASTER_PATH, courseId));
-                        showMessage("تم الحذف بنجاح", `تم حذف الدورة الرئيسية: "${courseName}".`, true);
-                    } catch (error) {
-                        console.error("Error deleting master course: ", error);
-                        showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف الدورة: ${error.message}.`, false);
-                    }
-                },
-                "تأكيد الحذف" 
-            );
+            showConfirm(`هل أنت متأكد من حذف الدورة الرئيسية: "${courseName}"؟`, async () => {
+                const courseItem = document.getElementById(`master-course-item-${courseId}`);
+                if (courseItem) { courseItem.style.opacity = '0.5'; courseItem.style.pointerEvents = 'none'; }
+                try { await deleteDoc(doc(db, COURSES_MASTER_PATH, courseId)); showMessage("تم الحذف بنجاح", `تم حذف الدورة الرئيسية: "${courseName}".`, true); } 
+                catch (error) { console.error("Error deleting master course: ", error); showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف الدورة: ${error.message}.`, false); }
+            }, "تأكيد الحذف");
         };
-        window.handleDeleteMasterCourse = handleDeleteMasterCourse;
 
-        // Delete a SCHEDULED course
         const handleDeleteScheduledCourse = async (courseId, courseName) => {
-            showConfirm(
-                `هل أنت متأكد من إلغاء جدولة الدورة: "${courseName}"؟ سيؤدي هذا إلى إزالتها من قائمة الحضور للمستخدمين في ذلك اليوم.`,
-                async () => {
-                    const courseItem = document.getElementById(`schedule-item-${courseId}`);
-                    if (courseItem) {
-                        courseItem.style.opacity = '0.5';
-                        courseItem.style.pointerEvents = 'none';
-                    }
-                    try {
-                        await deleteDoc(doc(db, SCHEDULE_PATH, courseId));
-                        showMessage("تم الحذف بنجاح", `تم إلغاء جدولة: "${courseName}".`, true);
-                    } catch (error) {
-                        console.error("Error deleting scheduled course: ", error);
-                        showMessage("خطأ في الحذف", `حدث خطأ أثناء إلغاء الجدولة: ${error.message}.`, false);
-                    }
-                },
-                "تأكيد الحذف" 
-            );
+            showConfirm(`هل أنت متأكد من إلغاء جدولة الدورة: "${courseName}"؟`, async () => {
+                const courseItem = document.getElementById(`schedule-item-${courseId}`);
+                if (courseItem) { courseItem.style.opacity = '0.5'; courseItem.style.pointerEvents = 'none'; }
+                try { await deleteDoc(doc(db, SCHEDULE_PATH, courseId)); showMessage("تم الحذف بنجاح", `تم إلغاء جدولة: "${courseName}".`, true); } 
+                catch (error) { console.error("Error deleting scheduled course: ", error); showMessage("خطأ في الحذف", `حدث خطأ أثناء إلغاء الجدولة: ${error.message}.`, false); }
+            }, "تأكيد الحذف");
         };
-        window.handleDeleteScheduledCourse = handleDeleteScheduledCourse;
 
-        // Add Edit/Save functions for Scheduled Courses
         const handleEditScheduledCourse = (courseId, currentName, currentDateYyyyMmDd, currentTimeHhMm) => {
             const infoDiv = document.getElementById(`schedule-info-${courseId}`);
             const actionsDiv = document.getElementById(`schedule-actions-${courseId}`);
             const listItem = document.getElementById(`schedule-item-${courseId}`);
-
             if (!infoDiv || !actionsDiv || !listItem) return;
-            
             infoDiv.classList.add('hidden'); 
-
-            // Create edit UI
             const tempEditDiv = document.createElement('div');
             tempEditDiv.id = `edit-schedule-div-${courseId}`;
             tempEditDiv.className = "flex flex-grow flex-col md:flex-row md:items-center gap-2";
             tempEditDiv.dir = "rtl";
-
             const nameSpan = document.createElement('span');
             nameSpan.className = "truncate font-medium text-gray-800";
             nameSpan.textContent = currentName;
-
-            // --- START FIX: Responsive input wrapper ---
             const inputsWrapper = document.createElement('div');
-            // On mobile: stack vertically (flex-col). On small screens and up: stack horizontally (sm:flex-row)
             inputsWrapper.className = "flex flex-col sm:flex-row gap-2 items-stretch sm:items-center";
-            // --- END FIX ---
-
             const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.value = currentDateYyyyMmDd;
+            dateInput.type = 'date'; dateInput.value = currentDateYyyyMmDd;
             dateInput.id = `edit-schedule-input-date-${courseId}`;
-            dateInput.className = 'p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto'; // Full width on mobile
-            dateInput.style.direction = "ltr";
-            dateInput.required = true;
-            
+            dateInput.className = 'p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto';
+            dateInput.style.direction = "ltr"; dateInput.required = true;
             const timeInput = document.createElement('input');
-            timeInput.type = 'time';
-            timeInput.value = currentTimeHhMm;
+            timeInput.type = 'time'; timeInput.value = currentTimeHhMm;
             timeInput.id = `edit-schedule-input-time-${courseId}`;
-            timeInput.className = 'p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto'; // Full width on mobile
-            timeInput.style.direction = "ltr";
-            timeInput.required = true;
-            
-            tempEditDiv.appendChild(nameSpan);
-            inputsWrapper.appendChild(dateInput);
-            inputsWrapper.appendChild(timeInput); 
-            tempEditDiv.appendChild(inputsWrapper);
-
-            listItem.insertBefore(tempEditDiv, actionsDiv); // Insert edit UI
-
-            // Change action buttons to Save and Cancel
+            timeInput.className = 'p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto';
+            timeInput.style.direction = "ltr"; timeInput.required = true;
+            tempEditDiv.appendChild(nameSpan); inputsWrapper.appendChild(dateInput); inputsWrapper.appendChild(timeInput); tempEditDiv.appendChild(inputsWrapper);
+            listItem.insertBefore(tempEditDiv, actionsDiv); 
             actionsDiv.innerHTML = `
-                <button onclick="window.handleSaveScheduledEdit('${courseId}')" 
-                        class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <button onclick="window.loadScheduledCourses()" 
-                        class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
-                </button>
+                <button onclick="window.handleSaveScheduledEdit('${courseId}')" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg></button>
+                <button onclick="window.loadScheduledCourses()" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
             `;
             dateInput.focus();
         };
-        window.handleEditScheduledCourse = handleEditScheduledCourse;
-
 
         const handleSaveScheduledEdit = async (courseId) => {
             const dateInput = document.getElementById(`edit-schedule-input-date-${courseId}`);
             const actionsDiv = document.getElementById(`schedule-actions-${courseId}`);
             const timeInput = document.getElementById(`edit-schedule-input-time-${courseId}`);
-
-            if (!dateInput || !dateInput.value || !timeInput || !timeInput.value) {
-                showMessage("خطأ في البيانات", "الرجاء تحديد التاريخ والوقت.", false);
-                return;
-            }
-            
-            const newDateString = dateInput.value;
-            const newTimeString = timeInput.value;
+            if (!dateInput || !dateInput.value || !timeInput || !timeInput.value) { showMessage("خطأ في البيانات", "الرجاء تحديد التاريخ والوقت.", false); return; }
+            const newDateString = dateInput.value; const newTimeString = timeInput.value;
             const newDate = new Date(`${newDateString}T${newTimeString}`); 
-            
-            dateInput.disabled = true;
-            timeInput.disabled = true; 
-            actionsDiv.style.opacity = '0.5'; 
-
+            dateInput.disabled = true; timeInput.disabled = true; if(actionsDiv) actionsDiv.style.opacity = '0.5'; 
             try {
                 const scheduledDocRef = doc(db, SCHEDULE_PATH, courseId);
                 const scheduledDoc = await getDoc(scheduledDocRef);
-
                 if (scheduledDoc.exists()) {
                     const { courseMasterId, courseName } = scheduledDoc.data();
-
-                    const existingScheduleQuery = firestoreQuery(collection(db, SCHEDULE_PATH), 
-                        where('courseMasterId', '==', courseMasterId),
-                        where('courseDate', '==', newDate)
-                    );
+                    const existingScheduleQuery = firestoreQuery(collection(db, SCHEDULE_PATH), where('courseMasterId', '==', courseMasterId), where('courseDate', '==', newDate));
                     const existingSnapshot = await getDocs(existingScheduleQuery);
-
                     if (!existingSnapshot.empty) {
-                        let isDuplicate = false;
-                        existingSnapshot.forEach(d => {
-                            if (d.id !== courseId) isDuplicate = true; 
-                        });
-
-                        if (isDuplicate) {
-                            showMessage("خطأ", `هذه الدورة ("${courseName}") مجدولة بالفعل في هذا التاريخ والوقت.`, false);
-                            dateInput.disabled = false;
-                            timeInput.disabled = false; 
-                            actionsDiv.style.opacity = '1';
-                            return;
-                        }
+                        let isDuplicate = false; existingSnapshot.forEach(d => { if (d.id !== courseId) isDuplicate = true; });
+                        if (isDuplicate) { showMessage("خطأ", `هذه الدورة ("${courseName}") مجدولة بالفعل في هذا التاريخ والوقت.`, false); dateInput.disabled = false; timeInput.disabled = false; if(actionsDiv) actionsDiv.style.opacity = '1'; return; }
                     }
                 }
-                
-                await updateDoc(scheduledDocRef, {
-                    courseDate: newDate,
-                    updatedAt: serverTimestamp() 
-                });
-
+                await updateDoc(scheduledDocRef, { courseDate: newDate, updatedAt: serverTimestamp() });
                 showMessage("تم الحفظ بنجاح", `تم تعديل تاريخ الدورة بنجاح.`, true);
-                
-            } catch (error) {
-                console.error("Error saving scheduled edit: ", error);
-                showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false);
-            } finally {
-                // onSnapshot will refresh, but re-enable just in case
-                if(dateInput) dateInput.disabled = false;
-                if(timeInput) timeInput.disabled = false; 
-                if(actionsDiv) actionsDiv.style.opacity = '1';
-            }
+            } catch (error) { console.error("Error saving scheduled edit: ", error); showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false);
+            } finally { if(dateInput) dateInput.disabled = false; if(timeInput) timeInput.disabled = false; if(actionsDiv) actionsDiv.style.opacity = '1'; }
         };
-        window.handleSaveScheduledEdit = handleSaveScheduledEdit;
 
-
-        // Edit a MASTER course
         const handleEditMasterCourse = (courseId, currentName) => {
             const nameSpan = document.getElementById(`master-course-name-${courseId}`);
             const actionsDiv = document.getElementById(`master-course-actions-${courseId}`);
             const listItem = document.getElementById(`master-course-item-${courseId}`);
-
             if (!nameSpan || !actionsDiv || !listItem) return;
-            
             nameSpan.classList.add('hidden'); 
-
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.value = currentName;
-            nameInput.id = `edit-master-input-name-${courseId}`;
-            nameInput.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500';
-            nameInput.dir = 'rtl';
-            nameInput.required = true;
-
-            const tempEditDiv = document.createElement('div');
-            tempEditDiv.id = `edit-master-div-${courseId}`;
-            tempEditDiv.className = "flex flex-grow items-center gap-2";
-            tempEditDiv.appendChild(nameInput);
-
+            const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.value = currentName;
+            nameInput.id = `edit-master-input-name-${courseId}`; nameInput.className = 'flex-grow p-1 border border-blue-400 rounded-lg text-right focus:ring-blue-500 focus:border-blue-500'; nameInput.dir = 'rtl'; nameInput.required = true;
+            const tempEditDiv = document.createElement('div'); tempEditDiv.id = `edit-master-div-${courseId}`; tempEditDiv.className = "flex flex-grow items-center gap-2"; tempEditDiv.appendChild(nameInput);
             listItem.insertBefore(tempEditDiv, actionsDiv); 
-            
             actionsDiv.innerHTML = `
-                <button onclick="window.handleSaveMasterEdit('${courseId}', '${currentName.replace(/'/g, "\\'")}')" 
-                        class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <button onclick="window.loadMasterCourses()" 
-                        class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
-                </button>
+                <button onclick="window.handleSaveMasterEdit('${courseId}', '${currentName.replace(/'/g, "\\'")}')" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-100 transition duration-150" title="حفظ التعديل"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg></button>
+                <button onclick="window.loadMasterCourses()" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="إلغاء"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
             `;
             nameInput.focus();
         };
-        window.handleEditMasterCourse = handleEditMasterCourse;
 
-        // Save edited MASTER course
         const handleSaveMasterEdit = async (courseId, originalName) => {
             const nameInput = document.getElementById(`edit-master-input-name-${courseId}`);
             const actionsDiv = document.getElementById(`master-course-actions-${courseId}`);
-
-            if (!nameInput || !nameInput.value.trim()) {
-                showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false);
-                return;
-            }
-            
+            if (!nameInput || !nameInput.value.trim()) { showMessage("خطأ في البيانات", "لا يمكن حفظ اسم دورة فارغ.", false); return; }
             const newName = nameInput.value.trim();
-            if (newName === originalName) {
-                showMessage("إلغاء التعديل", "لم يتم حفظ التعديل: الاسم الجديد مطابق للاسم القديم.", false);
-                loadMasterCourses(); 
-                return;
-            }
-            
-            nameInput.disabled = true;
-            actionsDiv.style.opacity = '0.5'; 
-
+            if (newName === originalName) { showMessage("إلغاء التعديل", "لم يتم حفظ التعديل: الاسم الجديد مطابق للاسم القديم.", false); loadMasterCourses(); return; }
+            nameInput.disabled = true; if(actionsDiv) actionsDiv.style.opacity = '0.5'; 
             try {
                 const existingCourseQuery = firestoreQuery(collection(db, COURSES_MASTER_PATH), where('name', '==', newName));
                 const existingSnapshot = await getDocs(existingCourseQuery);
-
                 if (!existingSnapshot.empty) {
-                    let isDuplicate = false;
-                    existingSnapshot.forEach(doc => {
-                        if (doc.id !== courseId) isDuplicate = true;
-                    });
-                    if (isDuplicate) {
-                        showMessage("خطأ", `الدورة "${newName}" موجودة بالفعل.`, false);
-                        nameInput.disabled = false;
-                        actionsDiv.style.opacity = '1';
-                        return;
-                    }
+                    let isDuplicate = false; existingSnapshot.forEach(doc => { if (doc.id !== courseId) isDuplicate = true; });
+                    if (isDuplicate) { showMessage("خطأ", `الدورة "${newName}" موجودة بالفعل.`, false); nameInput.disabled = false; if(actionsDiv) actionsDiv.style.opacity = '1'; return; }
                 }
-
-                await updateDoc(doc(db, COURSES_MASTER_PATH, courseId), {
-                    name: newName,
-                    updatedAt: serverTimestamp() 
-                });
-
+                await updateDoc(doc(db, COURSES_MASTER_PATH, courseId), { name: newName, updatedAt: serverTimestamp() });
                 showMessage("تم الحفظ بنجاح", `تم تعديل اسم الدورة من "${originalName}" إلى "${newName}".`, true);
-                
-            } catch (error) {
-                console.error("Error saving master course edit: ", error);
-                showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false);
-            } finally {
-                // onSnapshot will refresh, but re-enable just in case
-                if(nameInput) nameInput.disabled = false;
-                if(actionsDiv) actionsDiv.style.opacity = '1';
-            }
+            } catch (error) { console.error("Error saving master course edit: ", error); showMessage("خطأ في الحفظ", `حدث خطأ أثناء حفظ التعديل: ${error.message}.`, false); } finally { if(nameInput) nameInput.disabled = false; if(actionsDiv) actionsDiv.style.opacity = '1'; }
         };
-        window.handleSaveMasterEdit = handleSaveMasterEdit;
 
-
-        // New function to check course time on select
         const checkCourseTime = () => {
+            if (!courseNameSelect) return;
             const selectedOption = courseNameSelect.options[courseNameSelect.selectedIndex];
-
             if (!selectedOption || !selectedOption.hasAttribute('data-start-time')) {
-                submitButton.disabled = true;
-                if (buttonText.textContent === "لا يوجد دورات اليوم") {
-                    return; 
-                }
-                buttonText.textContent = "تسجيل الحضور"; 
-                return;
+                if (submitButton) submitButton.disabled = true;
+                if (buttonText && buttonText.textContent === "لا يوجد دورات اليوم") { return; }
+                if (buttonText) buttonText.textContent = "تسجيل الحضور"; return;
             }
-
             const startTime = parseInt(selectedOption.getAttribute('data-start-time'), 10);
-            
-            const REGISTRATION_OPEN_MINUTES_BEFORE = 15; 
-            const REGISTRATION_CLOSE_MINUTES_AFTER = 60; 
-            
+            const REGISTRATION_OPEN_MINUTES_BEFORE = 15; const REGISTRATION_CLOSE_MINUTES_AFTER = 60; 
             const registrationOpenTime = startTime - (REGISTRATION_OPEN_MINUTES_BEFORE * 60 * 1000);
             const registrationCloseTime = startTime + (REGISTRATION_CLOSE_MINUTES_AFTER * 60 * 1000);
             const now = new Date().getTime();
-
             if (now < registrationOpenTime) {
-                submitButton.disabled = true;
+                if (submitButton) submitButton.disabled = true;
                 const openTimeStr = new Date(registrationOpenTime).toLocaleString('ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit', hour12: true });
-                buttonText.textContent = `التسجيل يفتح الساعة ${openTimeStr}`;
-                showMessage("لم يبدأ التسجيل بعد", `التسجيل لهذه الدورة يفتح الساعة ${openTimeStr}.`, false);
+                if (buttonText) buttonText.textContent = `التسجيل يفتح الساعة ${openTimeStr}`; showMessage("لم يبدأ التسجيل بعد", `التسجيل لهذه الدورة يفتح الساعة ${openTimeStr}.`, false);
             } else if (now > registrationCloseTime) {
-                submitButton.disabled = true;
-                buttonText.textContent = "انتهى وقت التسجيل لهذه الدورة";
+                if (submitButton) submitButton.disabled = true; 
+                if (buttonText) buttonText.textContent = "انتهى وقت التسجيل لهذه الدورة"; 
                 showMessage("وقت التسجيل انتهى", "عذراً، لقد انتهى وقت التسجيل المسموح به لهذه الدورة.", false);
-            } else {
-                submitButton.disabled = false;
-                buttonText.textContent = "تسجيل الحضور";
+            } else { 
+                if (submitButton) submitButton.disabled = false; 
+                if (buttonText) buttonText.textContent = "تسجيل الحضور"; 
             }
         };
 
-
-        // Handle Add MASTER Course
         const handleAddMasterCourse = async (event) => {
             event.preventDefault();
             const newCourseInput = document.getElementById('newMasterCourseName');
             const courseName = newCourseInput.value.trim();
             const addButton = document.getElementById('addMasterCourseButton');
-
-            if (!courseName) return;
-
-            addButton.disabled = true;
-            addButton.textContent = "جاري الإضافة...";
-
+            if (!courseName || !addButton || !newCourseInput) return;
+            addButton.disabled = true; addButton.textContent = "جاري الإضافة...";
             try {
                 const existingCourseQuery = firestoreQuery(collection(db, COURSES_MASTER_PATH), where('name', '==', courseName));
                 const existingSnapshot = await getDocs(existingCourseQuery);
-                
-                if (!existingSnapshot.empty) {
-                    showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false);
-                    return;
+                if (!existingSnapshot.empty) { 
+                    showMessage("خطأ", `الدورة "${courseName}" موجودة بالفعل.`, false); 
+                    return; 
                 }
-                
-                await addDoc(collection(db, COURSES_MASTER_PATH), {
-                    name: courseName,
-                    createdAt: serverTimestamp() 
-                });
-                showMessage("تم بنجاح", `تم إضافة الدورة الرئيسية: "${courseName}"`, true);
-                newCourseInput.value = ''; 
-            } catch (error) {
-                console.error("Error adding master course: ", error);
-                showMessage("خطأ في الإضافة", `حدث خطأ أثناء إضافة الدورة: ${error.message}.`, false);
-            } finally {
-                addButton.disabled = false;
-                addButton.textContent = "إضافة دورة رئيسية";
-            }
+                await addDoc(collection(db, COURSES_MASTER_PATH), { name: courseName, createdAt: serverTimestamp() });
+                showMessage("تم بنجاح", `تم إضافة الدورة الرئيسية: "${courseName}"`, true); newCourseInput.value = '';
+            } catch (error) { console.error("Error adding master course: ", error); showMessage("خطأ في الإضافة", `حدث خطأ أثناء إضافة الدورة: ${error.message}.`, false);
+            } finally { addButton.disabled = false; addButton.textContent = "إضافة دورة رئيسية"; }
         };
         
-        // Handle SCHEDULE Course
         const handleScheduleCourse = async (event) => {
             event.preventDefault();
             const courseSelect = document.getElementById('scheduleCourseSelect');
             const dateInput = document.getElementById('scheduleCourseDate');
             const addButton = document.getElementById('scheduleCourseButton');
             const timeInput = document.getElementById('scheduleCourseTime');
-
+            if (!courseSelect || !dateInput || !addButton || !timeInput) return;
+            
             const courseId = courseSelect.value;
             const courseName = courseSelect.options[courseSelect.selectedIndex].text;
-            const courseDateString = dateInput.value;
-            const courseTimeString = timeInput.value;
-
-            if (!courseId || !courseDateString || !courseTimeString) {
-                showMessage("خطأ في البيانات", "الرجاء اختيار دورة وتاريخ ووقت لجدولتها.", false);
-                return;
-            }
-
+            const courseDateString = dateInput.value; const courseTimeString = timeInput.value;
+            if (!courseId || !courseDateString || !courseTimeString) { showMessage("خطأ في البيانات", "الرجاء اختيار دورة وتاريخ ووقت لجدولتها.", false); return; }
             const localDate = new Date(`${courseDateString}T${courseTimeString}`);
-
-            addButton.disabled = true;
-            addButton.textContent = "جاري الجدولة...";
-
+            addButton.disabled = true; addButton.textContent = "جاري الجدولة...";
             try {
-                const existingScheduleQuery = firestoreQuery(collection(db, SCHEDULE_PATH), 
-                    where('courseMasterId', '==', courseId),
-                    where('courseDate', '==', localDate)
-                );
+                const existingScheduleQuery = firestoreQuery(collection(db, SCHEDULE_PATH), where('courseMasterId', '==', courseId), where('courseDate', '==', localDate));
                 const existingSnapshot = await getDocs(existingScheduleQuery);
-
-                if (!existingSnapshot.empty) {
-                    showMessage("مجدولة مسبقاً", `هذه الدورة ("${courseName}") مجدولة بالفعل في هذا التاريخ والوقت.`, false);
-                    return;
+                if (!existingSnapshot.empty) { 
+                    showMessage("مجدولة مسبقاً", `هذه الدورة ("${courseName}") مجدولة بالفعل في هذا التاريخ والوقت.`, false); 
+                    return; 
                 }
-                
-                await addDoc(collection(db, SCHEDULE_PATH), {
-                    courseMasterId: courseId,
-                    courseName: courseName,
-                    courseDate: localDate, 
-                    createdAt: serverTimestamp() 
-                });
+                await addDoc(collection(db, SCHEDULE_PATH), { courseMasterId: courseId, courseName: courseName, courseDate: localDate, createdAt: serverTimestamp() });
                 showMessage("تم بنجاح", `تم جدولة الدورة: "${courseName}" بتاريخ ${courseDateString} الساعة ${courseTimeString}`, true);
-            } catch (error) {
-                console.error("Error scheduling course: ", error);
-                showMessage("خطأ في الجدولة", `حدث خطأ أثناء جدولة الدورة: ${error.message}.`, false);
-            } finally {
-                addButton.disabled = false;
-                addButton.textContent = "جدولة الدورة";
-            }
+            } catch (error) { console.error("Error scheduling course: ", error); showMessage("خطأ في الجدولة", `حدث خطأ أثناء جدولة الدورة: ${error.message}.`, false);
+            } finally { addButton.disabled = false; addButton.textContent = "جدولة الدورة"; }
         };
 
-
-        /**
-         * Loads attendance records from Firestore for the Admin view.
-         */
         const loadAttendanceRecords = () => {
-            if (!db) return;
+            if (!db || !isAdmin) return; /* (حماية) */
             const q = query(collection(db, ATTENDANCE_COLLECTION_PATH));
-            
             onSnapshot(q, (snapshot) => {
-                recordsTableBody.innerHTML = '';
-                
+                if (recordsTableBody) recordsTableBody.innerHTML = '';
                 currentRecords = []; 
-                snapshot.forEach((doc) => {
-                    currentRecords.push({ id: doc.id, data: doc.data() });
-                });
-
-                currentRecords.sort((a, b) => {
-                    const timeA = b.data.timestamp?.toDate ? b.data.timestamp.toDate().getTime() : 0;
-                    const timeB = a.data.timestamp?.toDate ? a.data.timestamp.toDate().getTime() : 0;
-                    return timeA - timeB; 
-                });
-
-                recordCountSpan.textContent = currentRecords.length;
-
-                if (currentRecords.length === 0) {
-                    recordsTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">لا توجد سجلات حضور مسجلة.</td></tr>';
-                    return;
-                }
-
+                snapshot.forEach((doc) => { currentRecords.push({ id: doc.id, data: doc.data() }); });
+                currentRecords.sort((a, b) => { const timeA = b.data.timestamp?.toDate ? b.data.timestamp.toDate().getTime() : 0; const timeB = a.data.timestamp?.toDate ? a.data.timestamp.toDate().getTime() : 0; return timeA - timeB; });
+                if (recordCountSpan) recordCountSpan.textContent = currentRecords.length;
+                if (currentRecords.length === 0) { if (recordsTableBody) recordsTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">لا توجد سجلات حضور مسجلة.</td></tr>'; return; }
                 currentRecords.forEach(record => {
-                    const docId = record.id;
-                    const recordData = record.data;
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-100 transition duration-100';
-                    row.id = `record-item-${docId}`; 
-
+                    const docId = record.id; const recordData = record.data;
+                    const row = document.createElement('tr'); row.className = 'hover:bg-gray-100 transition duration-100'; row.id = `record-item-${docId}`;
                     const date = recordData.timestamp?.toDate ? recordData.timestamp.toDate() : new Date();
                     const formattedDate = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    
                     const escapedName = (recordData.nameAr || 'سجل غير مسمى').replace(/'/g, "\\'");
-
                     row.innerHTML = `
                         <td class="px-3 py-3 whitespace-nowrap">${formattedDate}</td>
                         <td class="px-3 py-3 whitespace-nowrap">${recordData.courseName || '---'}</td>
@@ -1213,299 +914,142 @@
                         <td class="px-3 py-3 whitespace-nowrap font-medium">${recordData.nameAr || '---'}</td>
                         <td class="px-3 py-3 whitespace-nowrap">${recordData.workPlace || '---'}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-center">
-                            <button onclick="window.handleDeleteRecord('${docId}', '${escapedName}')" 
-                                    class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف السجل">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            </button>
-                        </td>
-                    `;
-                    recordsTableBody.appendChild(row);
+                            <button onclick="window.handleDeleteRecord('${docId}', '${escapedName}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف السجل"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        </td>`;
+                    if (recordsTableBody) recordsTableBody.appendChild(row);
                 });
-
                 console.log(`Loaded ${currentRecords.length} attendance records.`);
-
-            }, (error) => {
-                console.error("Error loading attendance records:", error);
-                recordsTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">خطأ في تحميل السجلات.</td></tr>';
-                showMessage("خطأ في السجلات", "فشل تحميل سجلات الحضور. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false);
-            });
+            }, (error) => { console.error("Error loading attendance records:", error); if (recordsTableBody) recordsTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">خطأ في تحميل السجلات.</td></tr>'; showMessage("خطأ في السجلات", "فشل تحميل سجلات الحضور. يرجى التأكد من أن الاتصال بالإنترنت فعال.", false); });
         };
         
-        /**
-         * Sends data to the Google Sheets Web App URL. (Admin Bulk Export)
-         */
         const exportRecordsToSheet = async () => {
-            if (!GOOGLE_SHEETS_SCRIPT_URL) {
-                showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false);
-                return;
-            }
-            if (currentRecords.length === 0) {
-                showMessage("لا توجد بيانات", "لا توجد سجلات حضور لتصديرها.", false);
-                return;
-            }
-
-            exportButton.disabled = true;
-            const originalText = exportButton.textContent;
-            exportButton.textContent = "جاري التصدير...";
-
+            if (!GOOGLE_SHEETS_SCRIPT_URL) { showMessage("خطأ في الإعداد", "لم يتم تعيين رابط Google Sheets Script URL في الكود.", false); return; }
+            if (currentRecords.length === 0) { showMessage("لا توجد بيانات", "لا توجد سجلات حضور لتصديرها.", false); return; }
+            if (exportButton) exportButton.disabled = true; 
+            const originalText = exportButton ? exportButton.textContent : ""; 
+            if (exportButton) exportButton.textContent = "جاري التصدير...";
             const formattedRecords = currentRecords.map(record => {
-                const recordData = record.data;
-                const date = recordData.timestamp?.toDate ? recordData.timestamp.toDate() : new Date();
-                
-                const formattedDate = date.toLocaleDateString('en-US', { 
-                    year: 'numeric', month: '2-digit', day: '2-digit', 
-                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                });
-
+                const recordData = record.data; const date = recordData.timestamp?.toDate ? recordData.timestamp.toDate() : new Date();
+                const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 return {
-                    "التاريخ": formattedDate,
-                    "اسم الدورة": recordData.courseName || '',
-                    "الرقم الوظيفي": recordData.employeeIdEn || '',
-                    "الاسم (عربي)": recordData.nameAr || '',
-                    "الاسم (إنجليزي)": recordData.nameEn || '',
-                    "الرقم الوطني": recordData.nationalIdEn || '',
-                    "مكان العمل": recordData.workPlace || '',
-                    "المسمى الوظيفي": recordData.jobTitle || '',
-                    "المؤهل العلمي": recordData.qualification || '',
-                    "رقم الهاتف": recordData.phoneEn || '',
-                    "App ID": recordData.appId || appId,
-                    "User ID": recordData.userId || userId
+                    "التاريخ": formattedDate, "اسم الدورة": recordData.courseName || '', "الرقم الوظيفي": recordData.employeeIdEn || '',
+                    "الاسم (عربي)": recordData.nameAr || '', "الاسم (إنجليزي)": recordData.nameEn || '', "الرقم الوطني": recordData.nationalIdEn || '',
+                    "مكان العمل": recordData.workPlace || '', "المسمى الوظيفي": recordData.jobTitle || '', "المؤهل العلمي": recordData.qualification || '',
+                    "رقم الهاتف": recordData.phoneEn || '', "App ID": recordData.appId || appId, "User ID": recordData.userId || userId
                 };
             });
+            try { await fetch(GOOGLE_SHEETS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ records: formattedRecords }) }); showMessage("تم الإرسال!", "تم إرسال السجلات بنجاح. يرجى التحقق من Google Sheet للتأكيد.", true);
+            } catch (error) { console.error("Network/Fetch Error:", error); showMessage("خطأ في الاتصال", `فشل في إرسال البيانات إلى Google Sheets: ${error.message}. تأكد من تفعيل الرابط.`, false);
+            } finally { if (exportButton) { exportButton.disabled = false; exportButton.textContent = originalText; } }
+        };
 
+        const handleDeleteRecord = async (recordId, attendeeName) => {
+            showConfirm(`هل أنت متأكد من حذف سجل الحضور الخاص بـ: "${attendeeName}"؟`, async () => {
+                    const recordItem = document.getElementById(`record-item-${recordId}`); if (recordItem) { recordItem.style.opacity = '0.5'; recordItem.style.pointerEvents = 'none'; }
+                    try { await deleteDoc(doc(db, ATTENDANCE_COLLECTION_PATH, recordId)); showMessage("تم الحذف بنجاح", `تم حذف سجل: "${attendeeName}".`, true); } 
+                    catch (error) { console.error("Error deleting record: ", error); showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف السجل: ${error.message}.`, false); if (recordItem) { recordItem.style.opacity = '1'; recordItem.style.pointerEvents = 'auto'; } }
+                }, "تأكيد الحذف");
+        };
+
+        const sendSingleRecordToSheet = async (record, dateObject) => {
+            if (!GOOGLE_SHEETS_SCRIPT_URL) return;
+            const formattedDate = dateObject.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const recordData = record;
+            const sheetRecord = {
+                "التاريخ": formattedDate, "اسم الدورة": recordData.courseName || '', "الرقم الوظيفي": recordData.employeeIdEn || '',
+                "الاسم (عربي)": recordData.nameAr || '', "الاسم (إنجليزي)": recordData.nameEn || '', "الرقم الوطني": recordData.nationalIdEn || '',
+                "مكان العمل": recordData.workPlace || '', "المسمى الوظيفي": recordData.jobTitle || '', "المؤهل العلمي": recordData.qualification || '', 
+                "رقم الهاتف": recordData.phoneEn || '', "App ID": recordData.appId || appId, "User ID": recordData.userId || userId
+            };
+            try { await fetch(GOOGLE_SHEETS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ records: [sheetRecord] }) }); } catch (error) { console.error("[Sheets] Background send error:", error); }
+        };
+
+        /* --- MODIFICATION: Add helper function to save profile to localStorage --- */
+        const saveProfileToLocalStorage = (data) => {
             try {
-                await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    body: JSON.stringify({ records: formattedRecords })
-                });
+                const employeeId = data.employeeIdEn;
+                if (!employeeId) return;
 
-                showMessage("تم الإرسال!", "تم إرسال السجلات بنجاح. يرجى التحقق من Google Sheet للتأكيد.", true);
-
-            } catch (error) {
-                console.error("Network/Fetch Error:", error);
-                showMessage("خطأ في الاتصال", `فشل في إرسال البيانات إلى Google Sheets: ${error.message}. تأكد من تفعيل الرابط.`, false);
-            } finally {
-                exportButton.disabled = false;
-                exportButton.textContent = originalText;
+                /* (نحفظ كل شيء، بما في ذلك البيانات الحساسة، محلياً فقط) */
+                const profile = {
+                    nameAr: data.nameAr || '',
+                    nameEn: data.nameEn || '',
+                    nationalIdEn: data.nationalIdEn || '',
+                    workPlace: data.workPlace || '',
+                    jobTitle: data.jobTitle || '',
+                    qualification: data.qualification || '',
+                    phoneEn: data.phoneEn || ''
+                };
+                
+                const storageKey = `attendanceProfile_${employeeId}`;
+                localStorage.setItem(storageKey, JSON.stringify(profile));
+                console.log("Profile saved to localStorage.");
+            } catch (e) {
+                console.warn("Could not save profile to localStorage:", e);
             }
         };
-        window.exportRecordsToSheet = exportRecordsToSheet;
 
+        /* --- MODIFICATION: Reactivate fetchUserDataByEmployeeId to use localStorage --- */
+        const fetchUserDataByEmployeeId = (event) => {
+            if (isAdmin) return; /* لا تقم بالملء التلقائي للمشرف */
+            const employeeId = event.target.value.trim();
+            if (employeeId.length < 3) return; /* ليس طويلاً بما يكفي */
 
-        /**
-         * Handles deleting an attendance record from Firestore using a custom confirmation modal.
-         */
-        const handleDeleteRecord = async (recordId, attendeeName) => {
-            showConfirm(
-                `هل أنت متأكد من حذف سجل الحضور الخاص بـ: "${attendeeName}"؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.`,
-                async () => {
-                    const recordItem = document.getElementById(`record-item-${recordId}`);
-                    if (recordItem) {
-                        recordItem.style.opacity = '0.5';
-                        recordItem.style.pointerEvents = 'none';
-                    }
+            try {
+                const storageKey = `attendanceProfile_${employeeId}`;
+                const storedData = localStorage.getItem(storageKey);
 
-                    try {
-                        await deleteDoc(doc(db, ATTENDANCE_COLLECTION_PATH, recordId));
-                        showMessage("تم الحذف بنجاح", `تم حذف سجل: "${attendeeName}".`, true);
-                    } catch (error) {
-                        console.error("Error deleting record: ", error);
-                        showMessage("خطأ في الحذف", `حدث خطأ أثناء حذف السجل: ${error.message}.`, false);
-                        if (recordItem) { 
-                            recordItem.style.opacity = '1';
-                            recordItem.style.pointerEvents = 'auto';
+                if (storedData) {
+                    const profile = JSON.parse(storedData);
+                    
+                    /* ملء الحقول */
+                    if (profile.nameAr && nameArInput) nameArInput.value = profile.nameAr;
+                    if (profile.nameEn && nameEnInput) nameEnInput.value = profile.nameEn;
+                    if (profile.nationalIdEn && nationalIdInput) nationalIdInput.value = profile.nationalIdEn;
+                    if (profile.phoneEn && phoneEnInput) phoneEnInput.value = profile.phoneEn;
+                    if (profile.jobTitle && jobTitleInput) jobTitleInput.value = profile.jobTitle;
+
+                    /* التعامل مع القوائم المنسدلة (مكان العمل) */
+                    const workPlaceValue = profile.workPlace || '';
+                    if(workPlaceSelect) {
+                        const predefinedWorkOptions = Array.from(workPlaceSelect.options).map(o => o.value);
+                        if (predefinedWorkOptions.includes(workPlaceValue)) {
+                            workPlaceSelect.value = workPlaceValue;
+                            toggleWorkPlaceOther(); /* لإخفاء "أخرى" إذا لم يكن "أخرى" */
+                        } else if (workPlaceValue) {
+                            workPlaceSelect.value = 'OTHER';
+                            toggleWorkPlaceOther(); /* لإظهار "أخرى" */
+                            if (workPlaceOtherInput) workPlaceOtherInput.value = workPlaceValue;
                         }
                     }
-                },
-                "تأكيد الحذف" 
-            );
-        };
-        window.handleDeleteRecord = handleDeleteRecord;
 
-
-        /**
-         * Sends a *single* new record to Google Sheets in the background.
-         */
-        const sendSingleRecordToSheet = async (record, dateObject) => {
-            if (!GOOGLE_SHEETS_SCRIPT_URL) {
-                console.warn("[Sheets] GOOGLE_SHEETS_SCRIPT_URL is not defined. Skipping single record export.");
-                return;
-            }
-
-            console.log("[Sheets] Sending single record to Google Sheets in background...");
-
-            const formattedDate = dateObject.toLocaleDateString('en-US', { 
-                year: 'numeric', month: '2-digit', day: '2-digit', 
-                hour: '2-digit', minute: '2-digit', second: '2-digit' 
-            });
-
-            const sheetRecord = {
-                "التاريخ": formattedDate,
-                "اسم الدورة": record.courseName || '',
-                "الرقم الوظيفي": record.employeeIdEn || '',
-                "الاسم (عربي)": record.nameAr || '',
-                "الاسم (إنجليزي)": record.nameEn || '',
-                "الرقم الوطني": record.nationalIdEn || '',
-                "مكان العمل": record.workPlace || '', 
-                "المسمى الوظيفي": record.jobTitle || '',
-                "المؤهل العلمي": record.qualification || '', 
-                "رقم الهاتف": record.phoneEn || '',
-                "App ID": record.appId || appId,
-                "User ID": record.userId || userId
-            };
-
-            const payload = {
-                records: [sheetRecord] 
-            };
-
-            try {
-                await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    body: JSON.stringify(payload)
-                });
-                console.log("[Sheets] Single record sent successfully (fire-and-forget).");
-            } catch (error) {
-                console.error("[Sheets] Background send error:", error);
-            }
-        };
-
-
-        /**
-         * Fetches user data based on employee ID and auto-fills the form.
-         */
-        const fetchUserDataByEmployeeId = async (event) => {
-            const employeeId = event.target.value.trim();
-            
-            console.log(`[Auto-fill] Event triggered. Employee ID: '${employeeId}'`);
-
-            if (employeeId.length < 3 || !/^\d+$/.test(employeeId)) {
-                if (nameArInput.value) nameArInput.value = '';
-                if (nameEnInput.value) nameEnInput.value = '';
-                if (nationalIdInput.value) nationalIdInput.value = '';
-                if (workPlaceSelect.value) workPlaceSelect.value = ''; 
-                workPlaceOtherInput.value = '';
-                workPlaceOtherInput.classList.add('hidden');
-                workPlaceOtherInput.required = false; 
-                if (jobTitleInput.value) jobTitleInput.value = '';
-                if (phoneEnInput.value) phoneEnInput.value = '';
-                if (qualificationSelect.value) qualificationSelect.value = '';
-                qualificationOtherInput.value = ''; 
-                qualificationOtherInput.classList.add('hidden');
-                qualificationOtherInput.required = false;
-                return;
-            }
-
-            console.log(`[Auto-fill] Querying Firestore for Employee ID: ${employeeId}...`);
-
-            try {
-                const q = firestoreQuery(
-                    collection(db, ATTENDANCE_COLLECTION_PATH),
-                    where('employeeIdEn', '==', employeeId)
-                );
-                const snapshot = await getDocs(q);
-
-                if (!snapshot.empty) {
-                    console.log(`[Auto-fill] Found ${snapshot.size} records. Finding latest...`);
-                    
-                    const allRecords = [];
-                    snapshot.forEach(doc => allRecords.push(doc.data()));
-
-                    allRecords.sort((a, b) => {
-                        const timeA = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
-                        const timeB = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
-                        return timeA - timeB; 
-                    });
-                    const latestRecord = allRecords[0]; 
-                    
-                    if (latestRecord.nameAr) nameArInput.value = latestRecord.nameAr;
-                    if (latestRecord.nameEn) nameEnInput.value = latestRecord.nameEn;
-                    if (latestRecord.nationalIdEn) nationalIdInput.value = latestRecord.nationalIdEn; 
-                    if (latestRecord.jobTitle) jobTitleInput.value = latestRecord.jobTitle;
-                    if (latestRecord.phoneEn) phoneEnInput.value = latestRecord.phoneEn;
-
-                    const workPlaceValue = latestRecord.workPlace || '';
-                    const predefinedWorkOptions = Array.from(workPlaceSelect.options).map(o => o.value);
-                    const isWorkPredefined = predefinedWorkOptions.includes(workPlaceValue);
-                    if (isWorkPredefined) {
-                        workPlaceSelect.value = workPlaceValue;
-                        workPlaceOtherInput.classList.add('hidden');
-                        workPlaceOtherInput.required = false;
-                        workPlaceOtherInput.value = '';
-                    } else if (workPlaceValue) {
-                        workPlaceSelect.value = 'OTHER';
-                        workPlaceOtherInput.classList.remove('hidden');
-                        workPlaceOtherInput.required = true;
-                        workPlaceOtherInput.value = workPlaceValue;
-                    } else {
-                        workPlaceSelect.value = '';
-                        workPlaceOtherInput.classList.add('hidden');
-                        workPlaceOtherInput.required = false;
-                        workPlaceOtherInput.value = '';
+                    /* التعامل مع القوائم المنسدلة (المؤهل) */
+                    const qualValue = profile.qualification || '';
+                    if(qualificationSelect) {
+                        const predefinedQualOptions = Array.from(qualificationSelect.options).map(o => o.value);
+                        if (predefinedQualOptions.includes(qualValue)) {
+                            qualificationSelect.value = qualValue;
+                            toggleQualificationOther(); 
+                        } else if (qualValue) {
+                            qualificationSelect.value = 'OTHER_QUAL';
+                            toggleQualificationOther(); 
+                            if (qualificationOtherInput) qualificationOtherInput.value = qualValue;
+                        }
                     }
-                    
-                    const qualValue = latestRecord.qualification || '';
-                    const predefinedQualOptions = Array.from(qualificationSelect.options).map(o => o.value);
-                    const isQualPredefined = predefinedQualOptions.includes(qualValue);
-                    if (isQualPredefined) {
-                        qualificationSelect.value = qualValue;
-                        qualificationOtherInput.classList.add('hidden');
-                        qualificationOtherInput.required = false;
-                        qualificationOtherInput.value = '';
-                    } else if (qualValue) {
-                        qualificationSelect.value = 'OTHER_QUAL';
-                        qualificationOtherInput.classList.remove('hidden');
-                        qualificationOtherInput.required = true;
-                        qualificationOtherInput.value = qualValue;
-                    } else {
-                        qualificationSelect.value = ''; 
-                        qualificationOtherInput.classList.add('hidden');
-                        qualificationOtherInput.required = false;
-                        qualificationOtherInput.value = '';
-                    }
-                    
-                    console.log(`[Auto-fill] User data loaded successfully for Employee ID: ${employeeId}`);
-                } else {
-                    console.log(`[Auto-fill] No previous records found for Employee ID: ${employeeId}.`);
+
+                    console.log("Profile loaded from localStorage.");
+                    showMessage("تم الملء التلقائي", "تم ملء البيانات تلقائياً من جهازك. يرجى المراجعة والتوقيع.", true);
                 }
-
-            } catch (error) {
-                console.error("[Auto-fill] Error fetching user data by Employee ID:", error);
+            } catch (e) {
+                console.warn("Could not load profile from localStorage:", e);
             }
         };
 
-        /**
-         * Toggles visibility of the 'Other Work Place' input field.
-         */
-        const toggleWorkPlaceOther = () => {
-            if (workPlaceSelect.value === 'OTHER') {
-                workPlaceOtherInput.classList.remove('hidden');
-                workPlaceOtherInput.required = true;
-            } else {
-                workPlaceOtherInput.classList.add('hidden');
-                workPlaceOtherInput.required = false;
-                workPlaceOtherInput.value = ''; 
-            }
-        };
+        const toggleWorkPlaceOther = () => { if (workPlaceSelect && workPlaceOtherInput) { if (workPlaceSelect.value === 'OTHER') { workPlaceOtherInput.classList.remove('hidden'); workPlaceOtherInput.required = true; } else { workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; workPlaceOtherInput.value = ''; } } };
+        const toggleQualificationOther = () => { if (qualificationSelect && qualificationOtherInput) { if (qualificationSelect.value === 'OTHER_QUAL') { qualificationOtherInput.classList.remove('hidden'); qualificationOtherInput.required = true; } else { qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false; qualificationOtherInput.value = ''; } } };
 
-        /**
-         * Toggles visibility of the 'Other Qualification' input field.
-         */
-        const toggleQualificationOther = () => {
-             if (qualificationSelect.value === 'OTHER_QUAL') {
-                 qualificationOtherInput.classList.remove('hidden');
-                 qualificationOtherInput.required = true;
-             } else {
-                 qualificationOtherInput.classList.add('hidden');
-                 qualificationOtherInput.required = false;
-                 qualificationOtherInput.value = ''; 
-             }
-        };
-
-        /**
-         * Initializes Firebase (with Auth) and loads data.
-         */
+        
+        /* **** دالة initializeFirebase **** */
         const initializeFirebase = async () => {
             try {
                 app = initializeApp(firebaseConfigFromEnv);
@@ -1514,21 +1058,75 @@
                 
                 await setPersistence(auth, browserSessionPersistence);
 
+                /* 1. التحقق من وجود توكن خاص (لبيئة Canvas) */
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                    console.log("Signed in with custom token.");
+                    
+                    const user = auth.currentUser;
+                    if (user) {
+                        userId = user.uid;
+                        const adminDocRef = doc(db, "Admins", userId);
+                        const adminDocSnap = await getDoc(adminDocRef);
+                        if (adminDocSnap.exists()) {
+                            console.log("Admin user (via token) authenticated.");
+                            isAdmin = true;
+                            loadMasterCourses();
+                            loadScheduledCourses();
+                            loadAttendanceRecords();
+                            if (viewToggle) {
+                                viewToggle.textContent = "تسجيل الخروج";
+                                viewToggle.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                                viewToggle.classList.add('bg-red-500', 'hover:bg-red-600');
+                            }
+                            switchView('admin'); 
+                        }
+                    }
+                
+                } else if (auth.currentUser) {
+                    /* 2. المستخدم مسجل دخوله مسبقاً (مثلاً: مشرف) */
+                    console.log("User already signed in:", auth.currentUser.email);
+                    userId = auth.currentUser.uid;
+                    const adminDocRef = doc(db, "Admins", userId);
+                    const adminDocSnap = await getDoc(adminDocRef);
+                    if (adminDocSnap.exists()) {
+                        console.log("Admin user (persistent) authenticated.");
+                        isAdmin = true;
+                        loadMasterCourses();
+                        loadScheduledCourses();
+                        loadAttendanceRecords();
+                        if (viewToggle) {
+                            viewToggle.textContent = "تسجيل الخروج";
+                            viewToggle.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                            viewToggle.classList.add('bg-red-500', 'hover:bg-red-600');
+                        }
+                        switchView('admin'); 
+                    } else {
+                        /* مسجل ولكنه ليس مشرفاً، سجّل خروجه */
+                        await signOut(auth);
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously after non-admin sign out.");
+                        if(auth.currentUser) userId = auth.currentUser.uid;
+                    }
 
-                userId = auth.currentUser?.uid || crypto.randomUUID();
+                } else {
+                    /* 3. لا يوجد مستخدم، سجّل الدخول كمجهول */
+                    await signInAnonymously(auth);
+                    console.log("Signed in anonymously.");
+                    if(auth.currentUser) userId = auth.currentUser.uid;
+                }
                 
-                loadCourses(); 
-                loadMasterCourses(); 
-                loadScheduledCourses(); 
-                loadAttendanceRecords(); 
-                
+                /* 4. الآن بعد ضمان وجود مستخدم (مشرف أو مجهول)، قم بتحميل الدورات */
+                if (!isAdmin) {
+                    loadCourses();
+                } else {
+                    /* (المشرف يحتاج أيضاً لرؤية قائمة الدورات في الواجهة الرئيسية) */
+                    loadCourses();
+                }
                 isReady = true;
-                
+                if (buttonText) buttonText.textContent = "تسجيل الحضور";
+                if (submitButton) submitButton.disabled = false;
+
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
                 showMessage("خطأ في الاتصال", "حدث خطأ أثناء الاتصال بالنظام: " + error.message, false);
@@ -1536,221 +1134,263 @@
             }
         };
 
-        /**
-         * Handles the form submission and saves data to Firestore.
-         */
         const handleSubmit = async (event) => {
             event.preventDefault();
-            if (!isReady) {
-                showMessage("النظام غير جاهز", "الرجاء الانتظار حتى يتم تحميل النظام.", false);
-                return;
-            }
-
-            if (!form.checkValidity()) {
-                showMessage("خطأ في البيانات", "الرجاء تعبئة جميع الحقول الإلزامية المشار إليها بعلامة (*) بشكل صحيح.", false);
-                form.reportValidity();
-                return;
-            }
-            
-            if (courseNameSelect.value === "" || courseNameSelect.disabled) {
-                showMessage("خطأ في البيانات", "الرجاء اختيار اسم دورة متاحة من القائمة. (قد لا توجد دورات لهذا اليوم)", false);
-                courseNameSelect.focus();
-                return;
-            }
+            if (!isReady) { showMessage("النظام غير جاهز", "الرجاء الانتظار حتى يتم تحميل النظام.", false); return; }
+            if (form && !form.checkValidity()) { showMessage("خطأ في البيانات", "الرجاء تعبئة جميع الحقول الإلزامية المشار إليها بعلامة (*) بشكل صحيح.", false); form.reportValidity(); return; }
+            if (courseNameSelect.value === "" || courseNameSelect.disabled) { showMessage("خطأ في البيانات", "الرجاء اختيار اسم دورة متاحة من القائمة. (قد لا توجد دورات لهذا اليوم)", false); courseNameSelect.focus(); return; }
             
             const employeeId = employeeIdInput.value.trim();
             const signature = document.getElementById('signature').value.trim();
+            if (employeeId !== signature) { showMessage("خطأ في التوقيع", "يجب أن يكون حقل التوقيع (الرقم الوظيفي) مطابقاً للرقم الوظيفي المدخل في الأعلى.", false); document.getElementById('signature').focus(); return; }
 
-            if (employeeId !== signature) {
-                showMessage("خطأ في التوقيع", "يجب أن يكون حقل التوقيع (الرقم الوظيفي) مطابقاً للرقم الوظيفي المدخل في الأعلى.", false);
-                document.getElementById('signature').focus();
-                return;
-            }
-
-            // START: Time Validation Check on Submit
             const selectedOption = courseNameSelect.options[courseNameSelect.selectedIndex];
-            if (!selectedOption || !selectedOption.hasAttribute('data-start-time')) {
-                showMessage("خطأ", "الرجاء اختيار دورة صالحة من القائمة.", false);
-                return;
-            }
-
+            if (!selectedOption || !selectedOption.hasAttribute('data-start-time')) { showMessage("خطأ", "الرجاء اختيار دورة صالحة من القائمة.", false); return; }
             const startTime = parseInt(selectedOption.getAttribute('data-start-time'), 10);
-            
-            const REGISTRATION_OPEN_MINUTES_BEFORE = 15;
-            const REGISTRATION_CLOSE_MINUTES_AFTER = 60; 
-            
+            const REGISTRATION_OPEN_MINUTES_BEFORE = 15; const REGISTRATION_CLOSE_MINUTES_AFTER = 60; 
             const registrationOpenTime = startTime - (REGISTRATION_OPEN_MINUTES_BEFORE * 60 * 1000);
             const registrationCloseTime = startTime + (REGISTRATION_CLOSE_MINUTES_AFTER * 60 * 1000);
             const now = new Date().getTime();
-
             if (now < registrationOpenTime) {
                 const openTimeStr = new Date(registrationOpenTime).toLocaleString('ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit', hour12: true });
-                showMessage("لم يبدأ التسجيل بعد", `التسجيل لهذه الدورة يفتح الساعة ${openTimeStr}.`, false);
-                return;
+                showMessage("لم يبدأ التسجيل بعد", `التسجيل لهذه الدورة يفتح الساعة ${openTimeStr}.`, false); return;
             }
+            if (now > registrationCloseTime) { showMessage("وقت التسجيل انتهى", "عذراً، لقد انتهى وقت التسجيل المسموح به لهذه الدورة.", false); return; }
 
-            if (now > registrationCloseTime) {
-                showMessage("وقت التسجيل انتهى", "عذراً، لقد انتهى وقت التسجيل المسموح به لهذه الدورة.", false);
-                return;
-            }
-            // END: Time Validation Check
-
-
-            // Gather form data
-            const formData = new FormData(form);
-            const data = {};
-
-            let finalWorkPlace = workPlaceSelect.value;
-            if (finalWorkPlace === 'OTHER') {
-                finalWorkPlace = workPlaceOtherInput.value.trim();
-            }
-
-            let finalQualification = qualificationSelect.value;
-            if (finalQualification === 'OTHER_QUAL') {
-                finalQualification = qualificationOtherInput.value.trim();
-            }
-
-            for (const [key, value] of formData.entries()) {
-                if (key !== 'workPlaceOther' && key !== 'qualificationOther' && key !== 'signature') { 
-                    data[key] = value.trim();
-                }
-            }
-            data.workPlace = finalWorkPlace;
-            data.qualification = finalQualification; 
+            const formData = new FormData(form); const data = {};
+            let finalWorkPlace = workPlaceSelect.value; if (finalWorkPlace === 'OTHER') finalWorkPlace = workPlaceOtherInput.value.trim();
+            let finalQualification = qualificationSelect.value; if (finalQualification === 'OTHER_QUAL') finalQualification = qualificationOtherInput.value.trim();
+            for (const [key, value] of formData.entries()) { if (key !== 'workPlaceOther' && key !== 'qualificationOther' && key !== 'signature') data[key] = value.trim(); }
+            data.workPlace = finalWorkPlace; data.qualification = finalQualification; 
+            data.timestamp = serverTimestamp(); data.userId = userId; data.appId = appId;
             
-            data.timestamp = serverTimestamp(); // This will be the "created" timestamp
-            data.userId = userId; 
-            data.appId = appId;
-            
-            // Get the exact selected course date (including time)
             const selectedCourseTimestamp = parseInt(selectedOption.getAttribute('data-exact-timestamp'), 10);
-            if (isNaN(selectedCourseTimestamp)) {
-                 showMessage("خطأ", "لم يتم العثور على وقت الدورة. الرجاء إعادة تحميل الصفحة.", false);
-                 return;
-            }
+            if (isNaN(selectedCourseTimestamp)) { showMessage("خطأ", "لم يتم العثور على وقت الدورة. الرجاء إعادة تحميل الصفحة.", false); return; }
             const selectedCourseDate = new Date(selectedCourseTimestamp);
-            
-            data.courseDate = selectedCourseDate; // This is the exact course timestamp
-            
-            // Final data object to be saved
-            const recordData = {
-                ...data,
-                workPlace: finalWorkPlace,
-                qualification: finalQualification
-            };
+            data.courseDate = selectedCourseDate; 
+            const recordData = { ...data, workPlace: finalWorkPlace, qualification: finalQualification };
 
-            // Show loading state
-            submitButton.disabled = true;
-            buttonText.textContent = "جاري الإرسال...";
-            loadingSpinner.classList.remove('hidden');
+            submitButton.disabled = true; buttonText.textContent = "جاري الإرسال..."; loadingSpinner.classList.remove('hidden');
             
             try {
-                // --- START: DUPLICATE CHECK & UPDATE LOGIC ---
-                // We use the exact Date object for the query, converted to a Firestore Timestamp
                 const firestoreCourseTimestamp = Timestamp.fromDate(selectedCourseDate);
-                
-                const duplicateCheckQuery = firestoreQuery(collection(db, ATTENDANCE_COLLECTION_PATH),
-                    where('employeeIdEn', '==', employeeId),
-                    where('courseDate', '==', firestoreCourseTimestamp) // Use the exact Timestamp
-                );
+                let snapshot;
 
-                const snapshot = await getDocs(duplicateCheckQuery);
+                /* --- (MODIFICATION: Only check for duplicates if admin) --- */
+                if (isAdmin) {
+                    const duplicateCheckQuery = firestoreQuery(collection(db, ATTENDANCE_COLLECTION_PATH), where('employeeIdEn', '==', employeeId), where('courseDate', '==', firestoreCourseTimestamp));
+                    snapshot = await getDocs(duplicateCheckQuery);
+                } else {
+                    /* Anonymous user: Create an empty snapshot object to skip the check */
+                    snapshot = { empty: true, docs: [] };
+                }
 
                 if (snapshot.empty) {
-                    // --- SCENARIO 1: NEW REGISTRATION ---
+                    /* (New registration for admin, or all registrations for anonymous) */
                     const docRef = await addDoc(collection(db, ATTENDANCE_COLLECTION_PATH), recordData);
                     console.log("New registration. Document written with ID:", docRef.id);
                     showMessage("تم تسجيل الحضور بنجاح", "تم تسجيل بيانات الحضور في النظام.", true);
+                    sendSingleRecordToSheet(recordData, new Date());
                     
-                    // Send to Google Sheets ONLY on new registration
-                    sendSingleRecordToSheet(recordData, new Date()); // Use client time for sheet log
+                    /* --- MODIFICATION: Save profile to localStorage on success --- */
+                    saveProfileToLocalStorage(recordData);
 
-                    form.reset();
-                    courseNameSelect.value = ""; 
-                    workPlaceOtherInput.classList.add('hidden');
-                    workPlaceOtherInput.required = false;
-                    qualificationOtherInput.classList.add('hidden'); 
-                    qualificationOtherInput.required = false;
-                    
-                    submitButton.disabled = false;
-                    buttonText.textContent = "تسجيل الحضور";
-                    loadingSpinner.classList.add('hidden');
-
+                    form.reset(); courseNameSelect.value = ""; 
+                    workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
                 } else {
-                    // --- SCENARIO 2: DUPLICATE FOUND - ASK TO UPDATE ---
+                    /* (Only admin can reach this part) */
                     const existingDocId = snapshot.docs[0].id;
-                    
-                    showConfirm(
-                        "لقد قمت بالتسجيل في هذه الدورة مسبقاً. هل ترغب بتحديث بياناتك بالمعلومات الجديدة التي أدخلتها الآن؟",
-                        async () => {
-                            // --- Logic executed only if user clicks "Yes" ---
+                    showConfirm("لقد قمت بالتسجيل في هذه الدورة مسبقاً. هل ترغب بتحديث بياناتك بالمعلومات الجديدة التي أدخلتها الآن؟", async () => {
                             try {
                                 const docRef = doc(db, ATTENDANCE_COLLECTION_PATH, existingDocId);
-                                
-                                // We use the new data, but keep the original timestamp
-                                // We add an "updatedAt" field
                                 const dataToUpdate = { ...recordData, timestamp: snapshot.docs[0].data().timestamp, updatedAt: serverTimestamp() }; 
-                                
                                 await updateDoc(docRef, dataToUpdate); 
-                                
                                 console.log("Existing registration updated. Document ID:", existingDocId);
                                 showMessage("تم تحديث البيانات", "لقد قمت بالتسجيل مسبقاً. تم تحديث بياناتك بنجاح.", true);
-
-                                // Send the UPDATED record to Google Sheets
-                                // We pass the *new* data, but the *original* registration date for logging
                                 sendSingleRecordToSheet(recordData, snapshot.docs[0].data().timestamp.toDate());
+                                
+                                /* --- MODIFICATION: Save updated profile to localStorage --- */
+                                saveProfileToLocalStorage(dataToUpdate);
 
-                                form.reset();
-                                courseNameSelect.value = ""; 
-                                workPlaceOtherInput.classList.add('hidden');
-                                workPlaceOtherInput.required = false;
-                                qualificationOtherInput.classList.add('hidden'); 
-                                qualificationOtherInput.required = false;
-
-                            } catch (updateError) {
-                                console.error("Error updating document: ", updateError);
-                                showMessage("خطأ في التحديث", `حدث خطأ أثناء تحديث البيانات: ${updateError.message}.`, false);
-                            } finally {
-                                submitButton.disabled = false;
-                                buttonText.textContent = "تسجيل الحضور";
-                                loadingSpinner.classList.add('hidden');
-                            }
-                        },
-                        "تأكيد التحديث" 
-                    );
-                    // Note: If user clicks "No", the handleConfirmNo() function
-                    // will automatically re-enable the button.
+                                form.reset(); courseNameSelect.value = ""; 
+                                workPlaceOtherInput.classList.add('hidden'); workPlaceOtherInput.required = false; qualificationOtherInput.classList.add('hidden'); qualificationOtherInput.required = false;
+                            } catch (updateError) { console.error("Error updating document: ", updateError); showMessage("خطأ في التحديث", `حدث خطأ أثناء تحديث البيانات: ${updateError.message}.`, false);
+                            } finally { /* This part is now handled in the 'finally' below */ }
+                        }, "تأكيد التحديث");
                 }
-                // --- END: DUPLICATE CHECK & UPDATE LOGIC ---
-
             } catch (error) { 
-                console.error("Error checking/adding document: ", error); 
-                showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
-                submitButton.disabled = false;
-                buttonText.textContent = "تسجيل الحضور";
-                loadingSpinner.classList.add('hidden');
-            } 
+                console.error("Error checking/adding document: ", error); showMessage("خطأ في التسجيل", `حدث خطأ أثناء حفظ البيانات: ${error.message}.`, false);
+            } finally {
+                /* This will run after 'try' or 'catch', ensuring button is re-enabled */
+                if(submitButton) submitButton.disabled = false; 
+                if(buttonText) buttonText.textContent = "تسجيل الحضور"; 
+                if(loadingSpinner) loadingSpinner.classList.add('hidden');
+            }
         };
 
-        // Attach event listeners
-        form.addEventListener('submit', handleSubmit);
-        masterCourseForm.addEventListener('submit', handleAddMasterCourse);
-        scheduleCourseForm.addEventListener('submit', handleScheduleCourse);
-        
-        // EVENT LISTENERS for dynamic fields
-        employeeIdInput.addEventListener('change', fetchUserDataByEmployeeId); 
-        workPlaceSelect.addEventListener('change', toggleWorkPlaceOther);
-        qualificationSelect.addEventListener('change', toggleQualificationOther); 
-        courseNameSelect.addEventListener('change', checkCourseTime); 
-        
-        // Initial Firebase setup call
-        initializeFirebase();
+        /* دوال التحكم بنافذة المشرف */
+        const handleAdminClick = () => {
+            if (isAdmin) {
+                showConfirm("هل أنت متأكد من رغبتك في تسجيل الخروج؟", async () => { 
+                    await signOut(auth); 
+                    /* أعد تحميل الصفحة لضمان تسجيل الدخول كمجهول */
+                    window.location.reload();
+                }, "تأكيد الخروج");
+            } else {
+                const adminLoginError = document.getElementById('adminLoginError');
+                const adminLoginBox = document.getElementById('adminLoginBox');
+                if(adminLoginError) adminLoginError.classList.add('hidden');
+                if(adminLoginBox) adminLoginBox.classList.remove('hidden');
+                setTimeout(() => {
+                    if(adminLoginBox) adminLoginBox.classList.add('opacity-100');
+                }, 10);
+            }
+        };
 
-        // Initial state check for submit button
-        if (!isReady) {
-            buttonText.textContent = "جاري التحميل...";
-            submitButton.disabled = true;
-        }
+        const closeAdminLogin = () => {
+            const adminLoginBox = document.getElementById('adminLoginBox');
+            if(adminLoginBox) {
+                adminLoginBox.classList.remove('opacity-100');
+                setTimeout(() => adminLoginBox.classList.add('hidden'), 300);
+            }
+        };
+
+        const handleAdminLoginSubmit = async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorMsg = document.getElementById('adminLoginError');
+            const loginButton = document.getElementById('adminLoginButton');
+            loginButton.disabled = true; errorMsg.classList.add('hidden');
+            
+            try {
+                /* 1. تسجيل الدخول أولاً */
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                /* 2. التحقق من صلاحيات المشرف (الآن بعد تسجيل الدخول) */
+                const adminDocRef = doc(db, "Admins", user.uid);
+                const adminDocSnap = await getDoc(adminDocRef);
+
+                if (adminDocSnap.exists()) {
+                    /* --- 3a. نعم، هو مشرف --- */
+                    isAdmin = true;
+                    userId = user.uid;
+                    /* (إعادة تحميل الصفحة لتطبيق صلاحيات المشرف) */
+                    window.location.reload();
+                } else {
+                    /* --- 3b. لا، ليس مشرفاً --- */
+                    console.warn("User logged in but is not an admin:", email);
+                    errorMsg.textContent = "أنت لا تملك صلاحيات المشرف.";
+                    errorMsg.classList.remove('hidden');
+                    await signOut(auth); /* تسجيل الخروج */
+                }
+
+            } catch (error) {
+                /* (فشل تسجيل الدخول) */
+                console.error("Admin Login Error:", error.code);
+                errorMsg.classList.remove('hidden');
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') { 
+                    errorMsg.textContent = "البريد الإلكتروني أو كلمة السر غير صحيحة."; 
+                } else { 
+                    errorMsg.textContent = "حدث خطأ غير متوقع. حاول مرة أخرى."; 
+                }
+            } finally { 
+                loginButton.disabled = false; 
+            }
+        };
+
+        /* --- MODIFICATION: Assign functions to window scope --- */
+        window.handleAdminClick = handleAdminClick;
+        window.closeAdminLogin = closeAdminLogin;
+        window.handleConfirmNo = handleConfirmNo;
+        window.handleEditMasterCourse = handleEditMasterCourse;
+        window.handleDeleteMasterCourse = handleDeleteMasterCourse;
+        window.handleSaveMasterEdit = handleSaveMasterEdit;
+        window.handleEditScheduledCourse = handleEditScheduledCourse;
+        window.handleSaveScheduledEdit = handleSaveScheduledEdit;
+        window.handleDeleteScheduledCourse = handleDeleteScheduledCourse;
+        window.handleDeleteRecord = handleDeleteRecord;
+        window.exportRecordsToSheet = exportRecordsToSheet;
+        window.switchView = switchView;
+        window.loadScheduledCourses = loadScheduledCourses; /* (Needed for edit cancel) */
+        window.loadMasterCourses = loadMasterCourses; /* (Needed for edit cancel) */
+
+
+        /* --- MODIFICATION: Wrap all execution and element assignment in DOMContentLoaded --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            /* Set log level for debugging */
+            setLogLevel('Debug');
+
+            /* Assign all UI element variables */
+            employeeIdInput = document.getElementById('employeeIdEn');
+            nameArInput = document.getElementById('nameAr');
+            nameEnInput = document.getElementById('nameEn');
+            nationalIdInput = document.getElementById('nationalIdEn');
+            workPlaceSelect = document.getElementById('workPlace'); 
+            workPlaceOtherInput = document.getElementById('workPlaceOther');
+            jobTitleInput = document.getElementById('jobTitle');
+            phoneEnInput = document.getElementById('phoneEn');
+            qualificationSelect = document.getElementById('qualification'); 
+            qualificationOtherInput = document.getElementById('qualificationOther'); 
+            userView = document.getElementById('userView');
+            adminView = document.getElementById('adminView');
+            mainTitle = document.getElementById('mainTitle');
+            viewToggle = document.getElementById('viewToggle');
+            form = document.getElementById('attendanceForm');
+            masterCourseForm = document.getElementById('masterCourseForm');
+            masterCourseListUl = document.getElementById('courseMasterList');
+            scheduleCourseForm = document.getElementById('scheduleCourseForm');
+            scheduleCourseSelect = document.getElementById('scheduleCourseSelect');
+            courseScheduleListUl = document.getElementById('courseScheduleList'); 
+            courseNameSelect = document.getElementById('courseName');
+            recordsTableBody = document.getElementById('attendanceRecordsTable');
+            recordCountSpan = document.getElementById('recordCount');
+            submitButton = document.getElementById('submitButton');
+            buttonText = document.getElementById('buttonText');
+            loadingSpinner = document.getElementById('loadingSpinner');
+            exportButton = document.getElementById('exportButton');
+            adminLoginForm = document.getElementById('adminLoginForm');
+
+            /* --- MODIFICATION: Add event listener for confirmYesButton --- */
+            const confirmYesButton = document.getElementById('confirmYes');
+            if(confirmYesButton) {
+                confirmYesButton.addEventListener('click', () => {
+                    const confirmBox = document.getElementById('confirmBox');
+                    if(confirmBox) {
+                        confirmBox.classList.add('hidden', 'opacity-0');
+                        confirmBox.classList.remove('opacity-100');
+                    }
+                    if (confirmCallback) {
+                        confirmCallback();
+                        confirmCallback = null;
+                    }
+                });
+            }
+            /* --- END MODIFICATION --- */
+
+
+            /* Attach event listeners */
+            if (form) form.addEventListener('submit', handleSubmit);
+            if (masterCourseForm) masterCourseForm.addEventListener('submit', handleAddMasterCourse);
+            if (scheduleCourseForm) scheduleCourseForm.addEventListener('submit', handleScheduleCourse);
+            if (adminLoginForm) adminLoginForm.addEventListener('submit', handleAdminLoginSubmit);
+            if (employeeIdInput) employeeIdInput.addEventListener('change', fetchUserDataByEmployeeId); 
+            if (workPlaceSelect) workPlaceSelect.addEventListener('change', toggleWorkPlaceOther);
+            if (qualificationSelect) qualificationSelect.addEventListener('change', toggleQualificationOther); 
+            if (courseNameSelect) courseNameSelect.addEventListener('change', checkCourseTime); 
+            
+            /* Initial Firebase setup call */
+            initializeFirebase();
+            
+            /* Initial state check for submit button */
+            if (!isReady) { 
+                if (buttonText) buttonText.textContent = "جاري التحميل..."; 
+                if (submitButton) submitButton.disabled = true; 
+            }
+        
+        }); /* --- END OF DOMContentLoaded --- */
 
     </script>
 </body>
